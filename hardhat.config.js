@@ -1,8 +1,9 @@
 require("@nomicfoundation/hardhat-toolbox");
-require("dotenv").config();
+const dotenv = require("dotenv");
 
-/** @type import('hardhat/config').HardhatUserConfig */
-module.exports = {
+dotenv.config();
+
+const config = {
   solidity: "0.8.20",
   networks: {
     mantleTestnet: {
@@ -41,3 +42,5 @@ module.exports = {
     ]
   }
 };
+
+export default config;
