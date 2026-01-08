@@ -1,6 +1,6 @@
 #  BIMA - Decentralized Land Marketplace
 
-> **Hedera Track: Transforming Land Ownership in Africa through Blockchain**
+> **Mantle Track: Transforming Land Ownership in Africa through Blockchain**
 
 ## 📋 Project Documentation
 - **📊 Pitch Deck**: [View Our Presentation](https://docs.google.com/presentation/d/10I7Pw_kjgIZsvBHhTH_MazTGst457HE0/edit?usp=sharing&ouid=103572532230510575942&rtpof=true&sd=true)
