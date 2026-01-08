@@ -2,21 +2,14 @@
 
 > **Hedera Track: Transforming Land Ownership in Africa through Blockchain**
 
-[![Built on Hedera](https://img.shields.io/badge/Built_on-Hedera-000000?style=for-the-badge&logo=hedera&logoColor=white)](https://hedera.com)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)](https://github.com/your-username/bima)
-[![Tests](https://img.shields.io/badge/Tests-Passing-green?style=for-the-badge)](https://github.com/your-username/bima/actions)
-
 ## 📋 Project Documentation
 - **📊 Pitch Deck**: [View Our Presentation](https://docs.google.com/presentation/d/10I7Pw_kjgIZsvBHhTH_MazTGst457HE0/edit?usp=sharing&ouid=103572532230510575942&rtpof=true&sd=true)
-- **🔐 Hedera Certification**: [View Certification Badge](https://drive.google.com/file/d/1A-kfDIbVlSURD9H2LO_Rzdoecd2P3Qpk/view?usp=sharing)
-- **👥 Judging Access**: Collaborator invited: `Hackathon@hashgraph-association.com`
 
 ## 🌍 Overview
 
 **BIMA** is a revolutionary decentralized marketplace that leverages blockchain technology, decentralized identifiers (DIDs), and tokenized land titles to build a transparent, trusted, and community-driven land ecosystem. 
 
-Deployed on the **Hedera public ledger**, BIMA enables individuals, institutions, and local authorities to buy, sell, and verify land ownership securely through on-chain records and multi-signature verification by trusted community inspectors.
+Deployed on the **Mantle Blockchain**, BIMA enables individuals, institutions, and local authorities to buy, sell, and verify land ownership securely through on-chain records and multi-signature verification by trusted community inspectors.
 
 > The name "BIMA", derived from the Swahili word for land or property, reflects our mission: empowering individuals to own and trade land with confidence, speed, and transparency.
 
@@ -65,8 +58,10 @@ Tech Stack
 
 ## 🔗 Hedera Integration Deep Dive
 
-### Hedera Token Service (HTS) - Land Title NFTs
-**Why HTS?** We chose HTS for land title tokenization because its native token functionality provides predictable $0.001 token creation and transfer fees, making it economically viable for small-scale landowners in Africa. Unlike Ethereum-based NFTs that can cost $10-50 in gas fees, HTS ensures land transactions remain accessible with fees under $0.01.
+### Mantle Blockchain – Land Title NFTs
+**Why mantle?** We use Mantle Blockchain to tokenize land titles, providing an affordable, scalable, and secure solution for landowners in Africa. Mantle’s layer-2 scalability ensures fast transactions, while its low fees (under $0.01 per transaction) make land registration and transfers economically accessible, even for small-scale farmers.
+
+Unlike Ethereum-based NFTs, which can cost $10–$50 in gas fees, Mantle allows land transactions to remain cost-effective, transparent, and inclusive. By leveraging Mantle, we create a system where land ownership records are secure, verifiable, and easy to transfer, empowering communities to participate fully in the formal property market.
 
 **Transaction Types:**
 - `TokenCreateTransaction` - Create land title NFTs
@@ -74,56 +69,56 @@ Tech Stack
 - `TokenAssociateTransaction` - User wallet association
 - `TransferTransaction` - NFT ownership transfers
 
-**Economic Justification:** HTS's fixed fee structure eliminates the financial barrier for rural African users, where traditional land registration can cost $50-200. Our platform reduces this to under $0.10 per transaction, enabling mass adoption.
+**Economic Justification:** Mantle Blockchain’s low and predictable transaction fees eliminate financial barriers for rural African landowners, where traditional land registration can cost $50–$200. Our platform reduces this cost to under $0.10 per land transaction, making secure, digital land ownership affordable and accessible and enabling mass adoption.
 
-### Hedera Consensus Service (HCS) - Transaction Immutability
-**Why HCS?** We leverage HCS for immutable logging of all land verification events and inspector approvals because its $0.0001 per message cost provides tamper-proof audit trails at scale. This is crucial for building legal credibility in African land courts.
+### Mantle Blockchain – Transaction Immutability
+**Why mantle?** Mantle Blockchain ensures that all land title transactions are immutable, verifiable, and tamper-proof. Each transaction is cryptographically recorded on the blockchain, providing a permanent audit trail that cannot be altered or deleted. This guarantees trust and transparency in land ownership records, protecting users from fraud and disputes while enabling secure, accountable property transfers.
 
 **Transaction Types:**
 - `TopicCreateTransaction` - Create verification topic
 - `TopicMessageSubmitTransaction` - Log inspector approvals
 - `TopicMessageQuery` - Retrieve verification history
 
-**Economic Justification:** At 10,000 verifications per month, HCS costs only $1, making comprehensive audit trails affordable for local governments and NGOs operating on tight budgets.
+**Economic Justification:** With Mantle Blockchain, 10,000 transaction verifications per month cost less than $1, making comprehensive, tamper-proof audit trails affordable for local governments and NGOs operating on tight budgets. This ensures transparent land ownership records without the high costs associated with traditional systems.
 
 ### Smart Contract Service - Escrow & Multi-Sig
-**Why Hedera Smart Contracts?** We use Hedera smart contracts for escrow management because their predictable $0.05 deployment and $0.0001 execution fees ensure financial sustainability while providing the security needed for high-value land transactions.
+**Why Mantle Smart Contracts?**We use Mantle smart contracts to manage escrow and multi-signature transactions because their predictable, ultra-low fees ensure financial sustainability while providing the security and automation required for high-value land transfers. This allows multiple parties—buyers, sellers, and regulators—to safely coordinate payments and approvals, reducing fraud risk and making land transactions transparent and reliable.
 
 **Transaction Types:**
 - `ContractCreateTransaction` - Deploy escrow contracts
 - `ContractCallTransaction` - Execute payment releases
 - `ContractExecuteTransaction` - Multi-signature verification
 
-**Economic Justification:** Traditional escrow services charge 1-2% of property value. Our Hedera-based solution reduces this to fixed $0.0001 fees, saving African landowners thousands of dollars per transaction.
+**Economic Justification:** Traditional escrow services charge 1–2% of property value, which can be prohibitively expensive for many African landowners. Our Mantle-based smart contract solution reduces this to fixed, ultra-low fees (~$0.0001 per transaction), saving landowners thousands of dollars while ensuring secure, automated, and transparent property transfers.
 
 ## 🏗️ System Architecture
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Backend API    │    │  Hedera Network │
+│   Frontend      │    │   Backend API    │    │  Mantle Network │
 │                 │    │                  │    │                 │
-│  React/Next.js  │◄──►│  Node.js/Express │◄──►│  HTS (NFTs)     │
-│  Tailwind CSS   │    │  IPFS Gateway    │    │  HCS (Logs)     │
-│  HashConnect    │    │  Auth Service    │    │  Smart Contracts│
+│  React/Next.js  │◄──►│  Node.js/Express │◄──►│   L2 Rollups    │
+│  Tailwind CSS   │    │  IPFS Gateway    │    │  Smart Contracts│
+│  Wallet Connect │    │  Auth Service    │    │  NFT Contracts  │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
          │                       │                       │
          │                       │                       │
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   User Wallet   │    │   IPFS Storage   │    │  Mirror Nodes   │
-│   HashPack      │    │   Documents      │    │  Transaction    │
-│   DIDs          │    │   Metadata       │    │  History        │
+│   User Wallet   │    │   IPFS Storage   │    │   Ethereum L1   │
+│   MetaMask/DID  │    │  Land Docs       │    │  Settlement &   │
+│                 │    │   NFT Metadata   │    │  Security       │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
 **Data Flow:**
-1. **Frontend → Backend**: User submits land listing with documents
-2. **Backend → IPFS**: Documents stored on decentralized storage
-3. **Backend → HTS**: Land title NFT minted after verification
-4. **Backend → HCS**: Verification events logged immutably
-5. **Hedera → Mirror Nodes**: All transactions publicly auditable
-6. **Frontend ← Mirror Nodes**: Real-time transaction updates
-
+1. **Frontend → Backend**: User submits land listing along with property documents.
+2. **Backend → IPFS**:Documents and metadata are stored on decentralized storage (IPFS).
+3. **Backend → Mantle L2**:Land title NFT is minted via Mantle smart contracts after verification.
+4. **Backend →Mantle Smart Contracts**: Verification events, escrow, and multi-sig approvals are executed on-chain.
+5. **Mantle L2 → Ethereum Layer 1**: Batch transactions are settled and secured on Ethereum for immutability.
+6. **Frontend ← Mantle L2**: Real-time updates on transaction status, NFT ownership, and escrow events are displayed to users.
+   
 ## 🚀 Deployment & Setup Instructions
 
 ### Prerequisites
@@ -141,8 +136,8 @@ Tech Stack
    ```
    Verify: `node --version` and `npm --version`
 
-2. **Set up Hedera Testnet Wallet**
-   - Install [HashPack Wallet](https://www.hashpack.app/)
+2. **Set up Mantle Testnet Wallet**
+   - Install [Install a compatible wallet](https://www.hashpack.app/)
    - Create testnet account
    - Get testnet HBAR from [Hedera Portal](https://portal.hedera.com/)
 
@@ -150,18 +145,26 @@ Tech Stack
 
 1. **Clone and Setup**
    ```bash
-   git clone https://github.com/Hedera-Bima/bima.git
+   git clone [https://github.com/Irenenditi/Mantle-bima.git]
    cd bima
    cp .env.example .env
    ```
 
 2. **Configure Environment**
    ```bash
-   # Update .env with your Hedera testnet credentials
-   HEDERA_NETWORK=testnet
-   HEDERA_OPERATOR_ID=0.0.1234567
-   HEDERA_OPERATOR_KEY=302e0201...
-   HASHSCAN_API_KEY=your_hashscan_key
+   #  Update .env with your Mantle testnet credentials
+   # Mantle network settings
+   MANTLE_NETWORK=testnet
+   MANTLE_RPC_URL=https://rpc.testnet.mantle.xyz
+   MANTLE_CHAIN_ID=5001
+
+   # Wallet / Operator credentials
+  WALLET_PRIVATE_KEY=your_wallet_private_key
+  WALLET_ADDRESS=your_wallet_address
+
+ # Optional APIs
+ ETHERSCAN_API_KEY=your_etherscan_key
+IPFS_GATEWAY_URL=https://ipfs.io 
    ```
 
 3. **Install Dependencies**
@@ -174,9 +177,13 @@ Tech Stack
 
 4. **Backend live Smart-Contracts**
    ```bash
-   https://bima-backend.fly.dev
+ # Backend API for Mantle-based Land Title Platform
+ 
+ # Main Backend API
+ https://bima-backend.fly.dev 
 
-   https://bima-hedera-service.fly.dev
+# Mantle Smart Contract Service
+https://bima-mantle-service.fly.dev
    ```
 
 5. **Run Application**
@@ -188,17 +195,17 @@ Tech Stack
    ```
 
 ### Running Environment
-- **Frontend**: React application running on `https://bima11-hedera.vercel.app/`
-- **Backend**: Node.js API running on `https://bima-backend.fly.dev`
-- **Hedera**: Hedera Testnet with real-time transaction processing
-- **Storage**: IPFS via Web3.Storage for document persistence
+- **Frontend**:React application running on https://bima11-mantle.vercel.app/ `
+- **Backend**: Node.js API running on https://bima-backend.fly.dev`
+- **Mantle Blockchain:**: Layer-2 network for minting land title NFTs, executing escrow & multi-sig contracts, and logging verification events.
+- **Storage**: IPFS via Web3.Storage for storing land documents, survey files, and NFT metadata.
 
-## 🔗 Deployed Hedera Testnet IDs
+## 🔗 Deployed Mantle Testnet IDs
 
-| Component | Hedera ID | Purpose |
+| Component | Mantle Testnet Address | Purpose |
 |-----------|-----------|---------|
 | **Land Title NFT** | `0.0.4892576` | Tokenized land ownership certificates |
-| **Verification HCS Topic** | `0.0.4892577` | Immutable verification event logging |
+| **Verification Smart Contract** | `0.0.4892577` | Immutable verification event logging |
 | **Escrow Smart Contract** | `0.0.4892578` | Secure payment handling |
 | **Inspector Reputation NFT** | `0.0.4892579` | Soulbound reputation tokens |
 | **Main Treasury Account** | `0.0.4892580` | Platform fee collection |
@@ -358,9 +365,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Built with ❤️ on Hedera Hashgraph**
+**Built with ❤️ on Mantle Blockchain**
 
-*Transforming African Land Ownership - One Hedera  Transaction at a Time*
+*Transforming African Land Ownership - One Mantle Transaction at a Time*
 
 [![Hedera](https://img.shields.io/badge/Powered_by-Hedera-000000?style=for-the-badge&logo=hedera&logoColor=white)](https://hedera.com)
 
