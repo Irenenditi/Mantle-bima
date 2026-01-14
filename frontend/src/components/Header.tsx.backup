@@ -89,7 +89,6 @@ const Header: React.FC = () => {
 
     // Clean up on unmount
     return () => {
-      removeEventListeners();
       if (clearAccount) clearAccount();
       if (clearChain) clearChain();
     };
@@ -104,50 +103,41 @@ const Header: React.FC = () => {
         setAccountId(result.address);
         setEvmAddress(result.address);
         setErrorBanner(null);
-        
-        // Listen for account changes
-        window.ethereum.on('accountsChanged', (accounts: string[]) => {
-          if (accounts.length > 0) {
-            setAccountId(accounts[0]);
-            setEvmAddress(accounts[0]);
-          } else {
-            // Handle account disconnection
-            setAccountId(null);
-            setEvmAddress(null);
-          }
-        });
-
-        // Listen for chain changes
-        window.ethereum.on('chainChanged', () => {
-          window.location.reload();
-        });
+        setWcStatus('connected');
       }
+
+      await onSessionEvent(MantleSessionEvent.AccountsChanged as any, (payload: any) => {
+        try {
+          const list = Array.isArray(payload) ? payload : (payload?.accounts ?? payload?.accountIds ?? []);
+          const first = Array.isArray(list) ? list[0] : null;
+          if (typeof first === 'string') {
+            setAccountId(first);
+            fetchAccountInfo(first);
+            setErrorBanner(null);
+            setWcStatus(null);
+          }
+        } catch (err) {
+          console.error('Failed to parse AccountsChanged payload', err, payload);
+        }
+      });
+      setWcStatus('Waiting for approval in your wallet…');
+      await openConnectModal();
     } catch (e: any) {
-      console.error('Failed to connect to MetaMask:', e);
-      setErrorBanner(e?.message || 'Failed to connect to MetaMask');
+      console.error('Failed to open WalletConnect modal:', e);
+      const msg = String(e?.message || e || '').toLowerCase();
+      if (msg.includes('vite_walletconnect_project_id') || msg.includes('walletconnect configuration error')) {
+        setErrorBanner('WalletConnect is not configured. Add VITE_WALLETCONNECT_PROJECT_ID to frontend/.env and restart the dev server.');
+      } else {
+        setErrorBanner('Wallet connection failed. Please try again.');
+      }
     } finally {
       setIsConnecting(false);
     }
   };
 
-  // Function to remove event listeners
-  const removeEventListeners = () => {
-    if (window.ethereum) {
-      // Remove all event listeners to prevent memory leaks
-      window.ethereum.removeAllListeners('accountsChanged');
-      window.ethereum.removeAllListeners('chainChanged');
-    }
-  };
-
   const handleDisconnect = async () => {
     try {
-      // Remove event listeners before disconnecting
-      removeEventListeners();
-      
-      // Disconnect from MetaMask
       disconnectMetaMask();
-      
-      // Reset state
       setAccountId(null);
       setEvmAddress(null);
       setHbarBalance(null);

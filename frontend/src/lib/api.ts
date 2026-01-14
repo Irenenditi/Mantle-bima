@@ -16,7 +16,7 @@ const getMantleServiceURL = () => {
     import.meta.env.DEV;
 
   return isLocalDevelopment
-    ? "http://localhost:3000"
+    ? "http://localhost:5000"
     : "https://bima-Mantle-service-v2.fly.dev";
 };
 
