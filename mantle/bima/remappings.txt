@@ -1,0 +1,4 @@
+bima-frontend/=../../frontend/src/
+@openzeppelin/=lib/openzeppelin-contracts/
+openzeppelin-contracts/=lib/openzeppelin-contracts/
+
