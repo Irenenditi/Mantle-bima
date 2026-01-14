@@ -4,7 +4,7 @@ import { Shield, Twitter, Github, Linkedin, Mail, MapPin, Phone } from "lucide-r
 export const Footer = () => {
   const footerLinks = {
     product: [
-      { label: "How it Works", href: "https://hedera-bima.gitbook.io/hedera-bima-docs/" },
+      { label: "How it Works", href: "https://Mantle-bima.gitbook.io/Mantle-bima-docs/" },
       { label: "Marketplace", href: "/hero" },
       { label: "Inspectors", href: "/trusted" },
       { label: "Pricing", href: "#" },
@@ -142,8 +142,8 @@ export const Footer = () => {
             </div>
             
             <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-sm">
-              Revolutionizing land ownership with Hedera technology. 
-              Secure, transparent, and verified property transactions on Hedera.
+              Revolutionizing land ownership with Mantle technology. 
+              Secure, transparent, and verified property transactions on Mantle.
             </p>
 
             {/* Contact Info */}
@@ -289,7 +289,7 @@ export const Footer = () => {
             className="text-sm text-muted-foreground"
           >
             © {new Date().getFullYear()} Bima. All rights reserved. 
-            <span className="ml-2 text-primary/60">Built on Hedera</span>
+            <span className="ml-2 text-primary/60">Built on Mantle</span>
           </motion.p>
 
           {/* Social Links */}
@@ -334,7 +334,7 @@ export const Footer = () => {
                 ease: "easeInOut",
               }}
             />
-            <span className="text-xs text-primary font-medium">Hedera Hashgraph Secured</span>
+            <span className="text-xs text-primary font-medium">Mantle Hashgraph Secured</span>
           </motion.div>
         </motion.div>
       </div>

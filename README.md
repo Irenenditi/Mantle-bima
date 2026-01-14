@@ -50,13 +50,13 @@ Tech Stack
 🧠 Languages & Frameworks
 
 
-🌐 Hedera Hashgraph & Web3
+🌐 Mantle Hashgraph & Web3
 
 
 🧰 Development Tools
 
 
-## 🔗 Hedera Integration Deep Dive
+## 🔗 Mantle Integration Deep Dive
 
 ### Mantle Blockchain – Land Title NFTs
 **Why mantle?** We use Mantle Blockchain to tokenize land titles, providing an affordable, scalable, and secure solution for landowners in Africa. Mantle’s layer-2 scalability ensures fast transactions, while its low fees (under $0.01 per transaction) make land registration and transfers economically accessible, even for small-scale farmers.
@@ -139,7 +139,7 @@ Unlike Ethereum-based NFTs, which can cost $10–$50 in gas fees, Mantle allows 
 2. **Set up Mantle Testnet Wallet**
    - Install [Install a compatible wallet](https://www.hashpack.app/)
    - Create testnet account
-   - Get testnet HBAR from [Hedera Portal](https://portal.hedera.com/)
+   - Get testnet HBAR from [Mantle Portal](https://portal.Mantle.com/)
 
 ### Quick Setup (Under 10 Minutes)
 
@@ -285,7 +285,7 @@ https://bima-mantle-service.fly.dev
 - Protection for both buyers and sellers
 
 ### 🔍 Transparency Layer
-- All interactions visible on public Hedera ledger
+- All interactions visible on public Mantle ledger
 - Full traceability via HashScan Explorer
 - Tamper-proof transaction records
 
@@ -308,9 +308,9 @@ https://bima-mantle-service.fly.dev
 
 ## 📊 Project Status
 
-- **✅ Core Smart Contracts**: Deployed on Hedera Testnet
+- **✅ Core Smart Contracts**: Deployed on Mantle Testnet
 - **✅ Frontend MVP**: Complete with all key features
-- **✅ Hedera Integration**: HTS, HCS, Smart Contracts operational
+- **✅ Mantle Integration**: HTS, HCS, Smart Contracts operational
 - **🔄 User Testing**: Ongoing with African land registry partners
 - **📱 Mobile App**: Development in progress
 
@@ -357,8 +357,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 Links
 
 - [Website](https://bima-heder.vercel.app/)
-- [Documentation]([https://docs.bima-land.com](https://hedera-bima.gitbook.io/hedera-bima-docs/))
-- [Hedera HashScan](https://hashscan.io/testnet/token/0.0.4892576)
+- [Documentation]([https://docs.bima-land.com](https://Mantle-bima.gitbook.io/Mantle-bima-docs/))
+- [Mantle HashScan](https://hashscan.io/testnet/token/0.0.4892576)
 
 
 ---
@@ -369,7 +369,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 *Transforming African Land Ownership - One Mantle Transaction at a Time*
 
-[![Hedera](https://img.shields.io/badge/Powered_by-Hedera-000000?style=for-the-badge&logo=hedera&logoColor=white)](https://hedera.com)
+[![Mantle](https://img.shields.io/badge/Powered_by-Mantle-000000?style=for-the-badge&logo=Mantle&logoColor=white)](https://Mantle.com)
 
 </div>
 

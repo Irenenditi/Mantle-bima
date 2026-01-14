@@ -1,11 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Wallet, ChevronDown } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { openConnectModal, onSessionEvent, disconnect as wcDisconnect } from '@/wallet/hederaConnector';
-import { connectHashpack, getConnectedAccount, clearHashpackConnection } from '@/lib/hashpack';
-import { HederaSessionEvent } from '@hashgraph/hedera-wallet-connect';
+import { 
+  connectMetaMask, 
+  disconnectMetaMask, 
+  onAccountsChanged, 
+  onChainChanged 
+} from '@/wallet/MetaMaskConnector';
 import { Link, useLocation } from 'react-router-dom';
 
 const Header: React.FC = () => {
@@ -42,71 +46,67 @@ const Header: React.FC = () => {
   }, [location.pathname]);
 
   // No persisted session support for WalletConnect path here; we reflect state once AccountsChanged fires
-  const network = (import.meta as any).env?.VITE_HEDERA_NETWORK?.toLowerCase?.() || 'testnet';
+  const network = (import.meta as any).env?.VITE_Mantle_NETWORK?.toLowerCase?.() || 'testnet';
   const mirrorBase = network === 'mainnet'
-    ? 'https://mainnet-public.mirrornode.hedera.com'
+    ? 'https://mainnet-public.mirrornode.Mantle.com'
     : network === 'previewnet'
-      ? 'https://previewnet.mirrornode.hedera.com'
-      : 'https://testnet.mirrornode.hedera.com';
+      ? 'https://previewnet.mirrornode.Mantle.com'
+      : 'https://testnet.mirrornode.Mantle.com';
 
-  const fetchAccountInfo = async (id: string) => {
-    try {
-      const res = await fetch(`${mirrorBase}/api/v1/accounts/${encodeURIComponent(id)}`);
-      if (!res.ok) throw new Error(`Mirror node ${res.status}`);
-      const data = await res.json();
-      const evm = data?.evm_address || data?.alias;
-      const tinybar = data?.balance?.balance; // in tinybars
-      setEvmAddress(evm || null);
-      setHbarBalance(typeof tinybar === 'number' ? tinybar / 1e8 : null);
-    } catch (err) {
-      console.error('Failed to fetch account info from mirror node', err);
-      setEvmAddress(null);
-      setHbarBalance(null);
-    }
-  };
-
+  // Set up MetaMask event listeners
   useEffect(() => {
-    const acc = getConnectedAccount?.();
-    if (acc && typeof acc === 'string') {
-      setAccountId(acc);
-      fetchAccountInfo(acc);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Listen for chain changes during WalletConnect flow to update status
-  useEffect(() => {
-    (async () => {
-      try {
-        await onSessionEvent(HederaSessionEvent.ChainChanged as any, () => {
-          setWcStatus(null);
-        });
-      } catch {
-        /* ignore */
+    // Check if already connected
+    const checkConnection = async () => {
+      if (window.ethereum?.selectedAddress) {
+        setAccountId(window.ethereum.selectedAddress);
+        setEvmAddress(window.ethereum.selectedAddress);
       }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    };
+    
+    checkConnection();
+
+    // Handle account changes
+    const clearAccount = onAccountsChanged((accounts: string[]) => {
+      if (accounts.length === 0) {
+        // Disconnected
+        setAccountId(null);
+        setEvmAddress(null);
+        setHbarBalance(null);
+      } else {
+        // Account changed
+        setAccountId(accounts[0]);
+        setEvmAddress(accounts[0]);
+      }
+      setIsConnecting(false);
+    });
+
+    // Handle chain changes
+    const clearChain = onChainChanged((chainId: string) => {
+      console.log('Chain changed:', chainId);
+      // Refresh the page on chain change to ensure proper state
+      window.location.reload();
+    });
+
+    // Clean up on unmount
+    return () => {
+      if (clearAccount) clearAccount();
+      if (clearChain) clearChain();
+    };
   }, []);
 
   const handleConnect = async () => {
     if (isConnecting) return;
     try {
       setIsConnecting(true);
-      try {
-        const hp = await connectHashpack(network as 'testnet' | 'mainnet' | 'previewnet');
-        const first = Array.isArray(hp?.accountIds) ? hp.accountIds[0] : null;
-        if (typeof first === 'string') {
-          setAccountId(first);
-          await fetchAccountInfo(first);
-          setErrorBanner(null);
-          setWcStatus(null);
-          return;
-        }
-      } catch {
-        // fall back to WalletConnect below
+      const result = await connectMetaMask();
+      if (result?.address) {
+        setAccountId(result.address);
+        setEvmAddress(result.address);
+        setErrorBanner(null);
+        setWcStatus('connected');
       }
 
-      await onSessionEvent(HederaSessionEvent.AccountsChanged as any, (payload: any) => {
+      await onSessionEvent(MantleSessionEvent.AccountsChanged as any, (payload: any) => {
         try {
           const list = Array.isArray(payload) ? payload : (payload?.accounts ?? payload?.accountIds ?? []);
           const first = Array.isArray(list) ? list[0] : null;
@@ -137,16 +137,13 @@ const Header: React.FC = () => {
 
   const handleDisconnect = async () => {
     try {
-      clearHashpackConnection();
-      await wcDisconnect();
-    } catch (e) {
-      console.error('Disconnect failed', e);
-    } finally {
+      disconnectMetaMask();
       setAccountId(null);
       setEvmAddress(null);
       setHbarBalance(null);
       setAccountMenuOpen(false);
-      setWcStatus(null);
+    } catch (err) {
+      console.error('Error disconnecting:', err);
     }
   };
 

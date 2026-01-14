@@ -44,7 +44,7 @@ const mockRequests: VerificationRequest[] = [
     location: "Nairobi, Karen Estate",
     area: "2.5 acres",
     sellerName: "John Kamau",
-    sellerDID: "did:hedera:testnet:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+    sellerDID: "did:Mantle:testnet:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
     requestDate: "2024-01-15",
     deadline: "2024-01-22",
     status: "pending",
@@ -60,7 +60,7 @@ const mockRequests: VerificationRequest[] = [
     location: "Kisumu, Milimani",
     area: "1.2 acres",
     sellerName: "Mary Wanjiku",
-    sellerDID: "did:hedera:testnet:z6MkfrQbsAH1PjjAup54GzNx13HgWNup2BM15WsDRgW9GvuP",
+    sellerDID: "did:Mantle:testnet:z6MkfrQbsAH1PjjAup54GzNx13HgWNup2BM15WsDRgW9GvuP",
     requestDate: "2024-01-14",
     deadline: "2024-01-21",
     status: "in-progress",
@@ -76,7 +76,7 @@ const mockRequests: VerificationRequest[] = [
     location: "Mombasa, Nyali",
     area: "0.8 acres",
     sellerName: "David Ochieng",
-    sellerDID: "did:hedera:testnet:z6Mkw94ByR26zMSkNdCUi6FNRsWnc2DtoBJNjTL4BPJiSKsz",
+    sellerDID: "did:Mantle:testnet:z6Mkw94ByR26zMSkNdCUi6FNRsWnc2DtoBJNjTL4BPJiSKsz",
     requestDate: "2024-01-13",
     deadline: "2024-01-20",
     status: "completed",
@@ -553,7 +553,7 @@ export default function InspectorDashboard() {
                       <span className="text-sm font-medium">Reputation NFT</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Your verification history and reputation are stored as an NFT on Hedera, 
+                      Your verification history and reputation are stored as an NFT on Mantle, 
                       providing verifiable credentials for your expertise.
                     </p>
                   </div>

@@ -122,7 +122,7 @@ export default function SellerDashboard() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMintingId, setIsMintingId] = useState<string | null>(null);
-  const [hederaListings, setHederaListings] = useState<LandListing[]>([]);
+  const [MantleListings, setMantleListings] = useState<LandListing[]>([]);
   const [editOpen, setEditOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<any>(null);
   const [editMeta, setEditMeta] = useState<any>(null);
@@ -154,13 +154,13 @@ export default function SellerDashboard() {
             images: 0,
             metadataHash: r.metadataHash,
           }));
-          setHederaListings(mappedFromIndex);
+          setMantleListings(mappedFromIndex);
           return;
         } catch {
-          // fall through to Hedera log
+          // fall through to Mantle log
         }
       }
-      // Fallback to Hedera verification log
+      // Fallback to Mantle verification log
       try {
         const res = await api.getParcels();
         const items = Array.isArray(res?.items) ? res.items : [];
@@ -181,9 +181,9 @@ export default function SellerDashboard() {
           images: 0,
           metadataHash: p.metadataHash,
         }));
-        setHederaListings(mapped);
+        setMantleListings(mapped);
       } catch (e) {
-        setHederaListings([]);
+        setMantleListings([]);
       }
     }
     loadParcels();
@@ -295,7 +295,7 @@ export default function SellerDashboard() {
         images: 0,
         metadataHash: p.metadataHash,
       }));
-      setHederaListings(mapped);
+      setMantleListings(mapped);
       alert("Listing updated successfully");
     } catch (e: any) {
       alert(e?.message || "Failed to update listing");
@@ -359,7 +359,7 @@ export default function SellerDashboard() {
     setIsSubmitting(true);
     let createdSuccessfully = false;
     let metadataHash = "";
-    let hederaSuccess = false;
+    let MantleSuccess = false;
 
     try {
       // 1) Optionally upload documents to IPFS if provided
@@ -440,7 +440,7 @@ export default function SellerDashboard() {
         metadataHash = `local-${Date.now()}`; // Fallback metadata hash
       }
 
-      // 3) Try to create verification entry on Hedera backend (optional)
+      // 3) Try to create verification entry on Mantle backend (optional)
       try {
         await api.createLandNFT({
           metadataHash,
@@ -448,13 +448,13 @@ export default function SellerDashboard() {
           price: formData.price,
           location: formData.location,
         });
-        hederaSuccess = true;
-      } catch (hederaError) {
-        console.warn("Hedera submission warning (non-critical):", hederaError);
-        // Continue even if Hedera fails - we'll still save to local database
+        MantleSuccess = true;
+      } catch (MantleError) {
+        console.warn("Mantle submission warning (non-critical):", MantleError);
+        // Continue even if Mantle fails - we'll still save to local database
       }
 
-      // 4) Save listing to Hedera service for marketplace visibility (IPFS index-backed)
+      // 4) Save listing to Mantle service for marketplace visibility (IPFS index-backed)
       try {
         const sellerId = formData.sellerEmail || formData.sellerPhone || 'anonymous';
         const existingIndex = localStorage.getItem('LISTINGS_INDEX_CID');
@@ -475,9 +475,9 @@ export default function SellerDashboard() {
         alert(
           isDraft
             ? "Listing created successfully!"
-            : hederaSuccess
-              ? "Listing submitted successfully and registered on Hedera blockchain!"
-              : "Listing submitted successfully! (Hedera registration pending)",
+            : MantleSuccess
+              ? "Listing submitted successfully and registered on Mantle blockchain!"
+              : "Listing submitted successfully! (Mantle registration pending)",
         );
 
         // Reset form
@@ -536,7 +536,7 @@ export default function SellerDashboard() {
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               List your land, track verification progress, and manage sales
-              through Hedera-secured transactions
+              through Mantle-secured transactions
             </p>
           </motion.div>
 
@@ -698,7 +698,7 @@ export default function SellerDashboard() {
               </div>
 
               <div className="grid gap-6">
-                {hederaListings.map((listing, index) => (
+                {MantleListings.map((listing, index) => (
                   <motion.div
                     key={listing.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -753,7 +753,7 @@ export default function SellerDashboard() {
                         >
                           {isMintingId === listing.id
                             ? "Minting..."
-                            : "Mint NFT (Hedera)"}
+                            : "Mint NFT (Mantle)"}
                         </button>
                         {listing.metadataHash && (
                           <a

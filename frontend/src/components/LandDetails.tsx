@@ -88,10 +88,10 @@ const LandDetails: React.FC = () => {
             match.source = "backend";
           }
         } catch (err) {
-          console.log("Not found in main backend, checking Hedera backend...");
+          console.log("Not found in main backend, checking Mantle backend...");
         }
 
-        // If not found, try Hedera backend
+        // If not found, try Mantle backend
         if (!match) {
           const res = await api.getParcels();
           const items = Array.isArray(res)
@@ -99,7 +99,7 @@ const LandDetails: React.FC = () => {
             : (res?.items ?? res?.data ?? []);
           match = items.find((p: any) => String(p.landId) === String(landId));
           if (match) {
-            match.source = "hedera";
+            match.source = "Mantle";
           }
         }
 
@@ -111,9 +111,9 @@ const LandDetails: React.FC = () => {
         }
         let meta: any = null;
 
-        // Process Hedera listing only
+        // Process Mantle listing only
 
-        // For Hedera listings, fetch metadata from IPFS
+        // For Mantle listings, fetch metadata from IPFS
         if (match.metadataHash) {
           try {
             const m = await fetch(
@@ -782,7 +782,7 @@ const LandDetails: React.FC = () => {
                             Legal Documents
                           </h3>
                           <p className="text-muted-foreground text-sm mb-4">
-                            All documents are Hedera-verified and legally
+                            All documents are Mantle-verified and legally
                             compliant
                           </p>
                         </div>
@@ -1044,12 +1044,12 @@ const LandDetails: React.FC = () => {
                       : "border-border/50 text-muted-foreground cursor-not-allowed"
                   }`}
                 >
-                  {isMinting ? "Minting..." : "Mint NFT (Hedera)"}
+                  {isMinting ? "Minting..." : "Mint NFT (Mantle)"}
                 </button>
 
                 <div className="text-center mt-3">
                   <p className="text-xs text-muted-foreground">
-                    Secure Hedera transaction • Instant ownership transfer
+                    Secure Mantle transaction • Instant ownership transfer
                   </p>
                 </div>
               </div>
@@ -1071,7 +1071,7 @@ const LandDetails: React.FC = () => {
                         Blockchain Verified
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Title deed on Hedera network
+                        Title deed on Mantle network
                       </div>
                     </div>
                   </div>
@@ -1164,7 +1164,7 @@ const LandDetails: React.FC = () => {
 
                   <div className="pt-3 border-t border-border/50">
                     <div className="text-xs text-muted-foreground">
-                      Hedera DID
+                      Mantle DID
                     </div>
                     <div className="text-xs font-mono bg-card/50 p-2 rounded mt-1 break-all">
                       {property.ownerDID}

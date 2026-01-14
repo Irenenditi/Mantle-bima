@@ -20,7 +20,7 @@ const steps = [
   {
     number: "02", 
     title: "Multi-Signature Verification",
-    description: "Trusted inspectors conduct on-ground verification and sign off using Hedera consensus",
+    description: "Trusted inspectors conduct on-ground verification and sign off using Mantle consensus",
     icon: Shield,
     color: "from-blue-500 to-indigo-600",
     details: [
@@ -34,12 +34,12 @@ const steps = [
   },
   {
     number: "03",
-    title: "Tokenized on Hedera",
-    description: "Title is minted as an NFT on Hedera network, creating immutable proof of ownership",
+    title: "Tokenized on Mantle",
+    description: "Title is minted as an NFT on Mantle network, creating immutable proof of ownership",
     icon: Coins,
     color: "from-purple-500 to-violet-600", 
     details: [
-      "NFT minting via Hedera Token Service",
+      "NFT minting via Mantle Token Service",
       "Smart contract escrow for payments",
       "Instant ownership transfer on purchase",
       "Permanent on-chain ownership record"
@@ -68,7 +68,7 @@ const keyFeatures = [
   {
     icon: MapPin,
     title: "Transparency Layer",
-    description: "All interactions visible on Hedera ledger for full traceability via HashScan"
+    description: "All interactions visible on Mantle ledger for full traceability via HashScan"
   }
 ];
 
@@ -138,8 +138,8 @@ export default function HowItWorks() {
               transition={{ delay: 0.2 }}
               className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8"
             >
-              Three simple steps to revolutionize land ownership with Hedera Hashgraph technology, 
-              community verification, and tokenized titles on Hedera Hashgraph
+              Three simple steps to revolutionize land ownership with Mantle Hashgraph technology, 
+              community verification, and tokenized titles on Mantle Hashgraph
             </motion.p>
 
             <motion.div
@@ -150,7 +150,7 @@ export default function HowItWorks() {
               className="flex flex-wrap justify-center gap-4 text-sm"
             >
               <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full">🌍 Emerging Economies</span>
-              <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full">⚡ Hedera Powered</span>
+              <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full">⚡ Mantle Powered</span>
               <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full">🔒 Community Verified</span>
             </motion.div>
           </motion.div>
@@ -327,7 +327,7 @@ export default function HowItWorks() {
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Key Innovation Features</span>
             </h2>
             <p className="text-lg text-muted-foreground text-center max-w-3xl mx-auto mb-16">
-              BIMA leverages Hedera Hashgraph technology to create a transparent, secure, and efficient land ownership ecosystem
+              BIMA leverages Mantle Hashgraph technology to create a transparent, secure, and efficient land ownership ecosystem
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -380,7 +380,7 @@ export default function HowItWorks() {
                 className="w-2 h-2 rounded-full bg-primary"
               />
               <span className="text-sm font-medium text-foreground">
-                Powered by <span className="font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Hedera Hashgraph</span>
+                Powered by <span className="font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Mantle Hashgraph</span>
               </span>
             </div>
           </motion.div>

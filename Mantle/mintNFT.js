@@ -8,7 +8,7 @@ export async function mintNFT({ tokenId, metadata, metadataHash }) {
     throw new Error("TOKEN_ID is required (pass tokenId or set env TOKEN_ID)");
   }
   if (!process.env.OPERATOR_ID || !process.env.OPERATOR_KEY) {
-    throw new Error("Missing Hedera credentials: OPERATOR_ID/OPERATOR_KEY");
+    throw new Error("Missing Mantle credentials: OPERATOR_ID/OPERATOR_KEY");
   }
 
   const client = createClient();

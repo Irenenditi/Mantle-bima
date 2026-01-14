@@ -73,32 +73,32 @@ else
     exit 1
 fi
 
-# Deploy Hedera Token Service
-print_status "Deploying Hedera Token Service..."
-cd "../Hedera Token Service"
+# Deploy Mantle Token Service
+print_status "Deploying Mantle Token Service..."
+cd "../Mantle Token Service"
 
 # Check if app exists, if not create it
-if ! flyctl apps show bima-hedera-service &> /dev/null; then
-    print_warning "App 'bima-hedera-service' not found. Creating it..."
-    flyctl apps create bima-hedera-service
+if ! flyctl apps show bima-Mantle-service &> /dev/null; then
+    print_warning "App 'bima-Mantle-service' not found. Creating it..."
+    flyctl apps create bima-Mantle-service
 fi
 
 # Check if volume exists, if not create it
-if ! flyctl volumes list --app bima-hedera-service | grep -q "hedera_data"; then
-    print_warning "Volume 'hedera_data' not found. Creating it..."
-    flyctl volumes create hedera_data --size 1 --region iad --app bima-hedera-service
+if ! flyctl volumes list --app bima-Mantle-service | grep -q "Mantle_data"; then
+    print_warning "Volume 'Mantle_data' not found. Creating it..."
+    flyctl volumes create Mantle_data --size 1 --region iad --app bima-Mantle-service
 fi
 
-# Deploy Hedera service
-print_status "Deploying Hedera Token Service..."
-flyctl deploy --app bima-hedera-service
+# Deploy Mantle service
+print_status "Deploying Mantle Token Service..."
+flyctl deploy --app bima-Mantle-service
 
 if [ $? -eq 0 ]; then
-    print_status "Hedera Token Service deployed successfully!"
-    HEDERA_URL=$(flyctl info --app bima-hedera-service | grep "Hostname" | awk '{print "https://"$2}')
-    echo "🔗 Hedera Service URL: $HEDERA_URL"
+    print_status "Mantle Token Service deployed successfully!"
+    Mantle_URL=$(flyctl info --app bima-Mantle-service | grep "Hostname" | awk '{print "https://"$2}')
+    echo "🔗 Mantle Service URL: $Mantle_URL"
 else
-    print_error "Hedera Token Service deployment failed!"
+    print_error "Mantle Token Service deployment failed!"
     exit 1
 fi
 
@@ -107,22 +107,22 @@ print_status "Deployment completed successfully!"
 echo ""
 echo "📋 Deployment Summary:"
 echo "  Main Backend: $BACKEND_URL"
-echo "  Hedera Service: $HEDERA_URL"
+echo "  Mantle Service: $Mantle_URL"
 echo ""
 echo "📝 Next Steps:"
 echo "  1. Update your frontend environment variables:"
 echo "     VITE_API_URL=$BACKEND_URL"
-echo "     VITE_HEDERA_SERVICE_URL=$HEDERA_URL"
+echo "     VITE_Mantle_SERVICE_URL=$Mantle_URL"
 echo ""
-echo "  2. Set required secrets for Hedera service:"
-echo "     flyctl secrets set OPERATOR_ID=\"0.0.xxxxxxx\" --app bima-hedera-service"
-echo "     flyctl secrets set OPERATOR_KEY=\"302e...\" --app bima-hedera-service"
-echo "     flyctl secrets set TOKEN_ID=\"0.0.xxxxxxx\" --app bima-hedera-service"
-echo "     flyctl secrets set PINATA_API_KEY=\"your-key\" --app bima-hedera-service"
-echo "     flyctl secrets set PINATA_SECRET_API_KEY=\"your-secret\" --app bima-hedera-service"
+echo "  2. Set required secrets for Mantle service:"
+echo "     flyctl secrets set OPERATOR_ID=\"0.0.xxxxxxx\" --app bima-Mantle-service"
+echo "     flyctl secrets set OPERATOR_KEY=\"302e...\" --app bima-Mantle-service"
+echo "     flyctl secrets set TOKEN_ID=\"0.0.xxxxxxx\" --app bima-Mantle-service"
+echo "     flyctl secrets set PINATA_API_KEY=\"your-key\" --app bima-Mantle-service"
+echo "     flyctl secrets set PINATA_SECRET_API_KEY=\"your-secret\" --app bima-Mantle-service"
 echo ""
 echo "  3. Redeploy frontend to Vercel with updated environment variables"
 echo ""
 echo "🔍 Monitor your apps:"
 echo "  flyctl logs --app bima-backend"
-echo "  flyctl logs --app bima-hedera-service"
+echo "  flyctl logs --app bima-Mantle-service"

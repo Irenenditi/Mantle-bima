@@ -1,7 +1,7 @@
-# fly.toml app configuration file for Hedera Token Service
+# fly.toml app configuration file for Mantle Token Service
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 
-app = "bima-hedera-service-v2"
+app = "bima-Mantle-service-v2"
 primary_region = "iad"
 
 [build]
@@ -20,7 +20,7 @@ primary_region = "iad"
   memory_mb = 256
 
 [[mounts]]
-  source = "hedera_data"
+  source = "Mantle_data"
   destination = "/app/uploads"
 
 [env]

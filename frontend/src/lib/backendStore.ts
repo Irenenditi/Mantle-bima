@@ -6,7 +6,7 @@ export type BackendStatus = {
   lastChecked: string | null;
   services: {
     ipfs: 'configured' | 'not configured';
-    hedera: 'configured' | 'not configured';
+    Mantle: 'configured' | 'not configured';
   } | null;
   error: string | null;
 };

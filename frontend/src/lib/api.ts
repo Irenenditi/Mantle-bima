@@ -1,10 +1,10 @@
 import axios from "axios";
 
 // Function to detect if running locally or in production
-const getHederaServiceURL = () => {
+const getMantleServiceURL = () => {
   // Check if we have an explicit environment variable
-  if (import.meta.env.VITE_HEDERA_SERVICE_URL) {
-    return import.meta.env.VITE_HEDERA_SERVICE_URL;
+  if (import.meta.env.VITE_Mantle_SERVICE_URL) {
+    return import.meta.env.VITE_Mantle_SERVICE_URL;
   }
 
   // Auto-detect based on environment
@@ -17,14 +17,14 @@ const getHederaServiceURL = () => {
 
   return isLocalDevelopment
     ? "http://localhost:3000"
-    : "https://bima-hedera-service-v2.fly.dev";
+    : "https://bima-Mantle-service-v2.fly.dev";
 };
 
-// Hedera Token Service URL - Auto-detects environment
-export const API_BASE_URL = getHederaServiceURL();
+// Mantle Token Service URL - Auto-detects environment
+export const API_BASE_URL = getMantleServiceURL();
 
-// Health check for Hedera service
-async function isHederaServiceAvailable(): Promise<boolean> {
+// Health check for Mantle service
+async function isMantleServiceAvailable(): Promise<boolean> {
   try {
     const response = await axios.get(`${API_BASE_URL}/health`, {
       timeout: 2000,
@@ -43,11 +43,11 @@ export const api = {
     price?: string;
     location?: string;
   }) {
-    // Check if Hedera service is available first
-    const isAvailable = await isHederaServiceAvailable();
+    // Check if Mantle service is available first
+    const isAvailable = await isMantleServiceAvailable();
     if (!isAvailable) {
       throw new Error(
-        "Hedera service is currently unavailable. Your listing will still be saved locally.",
+        "Mantle service is currently unavailable. Your listing will still be saved locally.",
       );
     }
     const response = await axios.post(`${API_BASE_URL}/nft/create`, body, {
@@ -152,5 +152,5 @@ export const api = {
     return response.data;
   },
 
-  // Backend functions removed - using only Hedera service
+  // Backend functions removed - using only Mantle service
 };

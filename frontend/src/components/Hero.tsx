@@ -129,7 +129,7 @@ const SellLandContent = ({
 
       const { ipfsHash: metadataHash } = await api.uploadJSONToIPFS(metadata);
 
-      // 4) Create land entry on Hedera service (returns landId)
+      // 4) Create land entry on Mantle service (returns landId)
       const created = await api.createLandNFT({
         metadataHash,
         size: formData.size,
@@ -612,16 +612,16 @@ export default function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
 
-  // Fetch listings from both Hedera backend and local SQLite backend
+  // Fetch listings from both Mantle backend and local SQLite backend
   const fetchListings = async () => {
     setIsLoading(true);
     try {
-      // Fetch from Hedera backend (minted parcels)
-      let hederaListings: LandListing[] = [];
+      // Fetch from Mantle backend (minted parcels)
+      let MantleListings: LandListing[] = [];
       try {
         const res = await api.getParcels("minted");
         const items = Array.isArray(res?.items) ? res.items : [];
-        hederaListings = await Promise.all(
+        MantleListings = await Promise.all(
           items.map(async (p: any) => {
             let imageUrl: string | undefined;
             if (p.metadataHash) {
@@ -674,11 +674,11 @@ export default function Hero() {
           }),
         );
       } catch (error) {
-        console.error("Failed to fetch Hedera listings:", error);
+        console.error("Failed to fetch Mantle listings:", error);
       }
 
-      // Use only Hedera listings
-      setBackendListings(hederaListings);
+      // Use only Mantle listings
+      setBackendListings(MantleListings);
     } catch (error) {
       console.error("Failed to fetch listings:", error);
     } finally {
@@ -690,7 +690,7 @@ export default function Hero() {
     fetchListings();
   }, []);
 
-  // Show ONLY Hedera-backed listings
+  // Show ONLY Mantle-backed listings
   const allListings = backendListings;
 
   return (
@@ -726,8 +726,8 @@ export default function Hero() {
             className="text-xl text-foreground/85 max-w-2xl mx-auto"
           >
             {activeTab === "buy"
-              ? "Browse verified properties with transparent ownership records secured on Hedera blockchain"
-              : "Transform your property into a digital asset with Hedera-verified ownership and reach global buyers through our secure marketplace"}
+              ? "Browse verified properties with transparent ownership records secured on Mantle blockchain"
+              : "Transform your property into a digital asset with Mantle-verified ownership and reach global buyers through our secure marketplace"}
           </motion.p>
 
           {/* Buy/Sell Toggle Buttons */}
@@ -1008,7 +1008,7 @@ export default function Hero() {
             transition={{ duration: 2, repeat: Infinity }}
             className="w-2 h-2 rounded-full bg-emerald-500"
           />
-          <span>All listings verified on Hedera Hashgraph</span>
+          <span>All listings verified on Mantle Hashgraph</span>
         </motion.div>
       </div>
     </section>

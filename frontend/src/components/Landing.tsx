@@ -20,7 +20,7 @@ const Index = () => {
     {
       url: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2148&q=80",
       title: "Verified Ownership",
-      description: "Hedera-secured land titles and documentation"
+      description: "Mantle-secured land titles and documentation"
     },
     {
       url: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
@@ -54,7 +54,7 @@ const Index = () => {
     {
       icon: Shield,
       title: "Tokenized Land Titles",
-      description: "NFTs on Hedera represent immutable ownership proof",
+      description: "NFTs on Mantle represent immutable ownership proof",
       benefit: "Eliminates fraud"
     },
     {
@@ -210,7 +210,7 @@ const Index = () => {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="mb-12"
             >
-            {/* Powered by Hedera Badge */}
+            {/* Powered by Mantle Badge */}
             <motion.div
               className="inline-flex items-center gap-3 px-6 py-3 mb-1 rounded-full bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border border-primary/30 backdrop-blur-sm"
               initial={{ scale: 0, rotate: -180 }}
@@ -220,7 +220,7 @@ const Index = () => {
             >
               <Shield className="w-6 h-6 text-accent" />
               <span className="text-xs font-semibold text-primary tracking-wider uppercase">
-                Powered by Hedera
+                Powered by Mantle
               </span>
               <motion.div
                 className="w-2 h-2 rounded-full bg-primary"
@@ -268,7 +268,7 @@ const Index = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7 }}
               >
-                Secure land transactions with Hedera-verified ownership
+                Secure land transactions with Mantle-verified ownership
               </motion.p>
 
               {/* CTA Buttons */}
