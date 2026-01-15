@@ -1,7 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { api } from "../lib/api";
+import { api, API_BASE_URL } from "../lib/api";
 import { resolveIpfsUrlAsync } from "../lib/ipfs";
 import {
   MapPin,
@@ -626,7 +626,19 @@ export default function Hero() {
         MantleListings = await Promise.all(
           items.map(async (p: any) => {
             let imageUrl: string | undefined;
-            if (p.metadataHash) {
+            
+            // Priority 1: Use images from database if available (they have path fields)
+            if (p.images && Array.isArray(p.images) && p.images.length > 0) {
+              const firstImage = p.images[0];
+              if (firstImage?.path) {
+                imageUrl = firstImage.path.startsWith("http")
+                  ? firstImage.path
+                  : `${API_BASE_URL}${firstImage.path}`;
+              }
+            }
+            
+            // Priority 2: Fallback to metadata images if database images not available
+            if (!imageUrl && p.metadataHash) {
               try {
                 // Resolve metadata URL (handles local hashes via resolver)
                 const metaUrl = p.metadataHash.startsWith("http")
@@ -657,7 +669,9 @@ export default function Hero() {
                     ? await resolveIpfsUrlAsync(cid, { isImage: true }) || undefined
                     : (first?.url as string | undefined);
                 }
-              } catch {}
+              } catch (err) {
+                console.log("Failed to load image from metadata:", err);
+              }
             }
             
             // Map backend status to verificationStatus for UI

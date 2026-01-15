@@ -1,0 +1,25 @@
+{
+  "title": "jowu",
+  "size": "3.5",
+  "price": "85885994",
+  "location": "mari",
+  "description": "jjjd",
+  "landType": "industrial",
+  "zoning": "resedential",
+  "utilities": "water",
+  "accessibility": "footpath",
+  "nearbyAmenities": "school",
+  "seller": {
+    "name": "john mokaya",
+    "phone": "+254746271236",
+    "email": "mokayaj@ieee.org"
+  },
+  "images": [
+    {
+      "cid": "http://localhost:5000/storage/uploads/images/1768475927519-5478e07c-ecc5-465b-868d-41a3e7ebbcf4.jpg"
+    }
+  ],
+  "documents": [],
+  "timestamp": "2026-01-15T11:18:47.679Z",
+  "status": "pending"
+}

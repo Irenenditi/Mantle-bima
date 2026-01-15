@@ -47,24 +47,27 @@ const StunningChatbot = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: 'You are BIMA Assistant, a helpful assistant for a land marketplace. Be concise and friendly.' },
             { role: 'user', content: userText }
           ]
         })
       });
-      if (!res.ok) {
-        let details: any = undefined;
-        try {
-          details = await res.json();
-        } catch {}
-        console.error('Chat backend error payload:', details || (await res.text()));
-        throw new Error('Network response was not ok');
-      }
+      
       const data = await res.json();
-      return data.reply || 'Sorry, I could not generate a response.';
-    } catch (err) {
+      
+      // Backend may return error in reply field with error flag
+      if (data.error || !res.ok) {
+        console.error('Chat backend error:', data);
+        return data.reply || data.error || 'Sorry, I had trouble getting a response. Please try again.';
+      }
+      
+      if (!data.reply) {
+        return 'Sorry, I could not generate a response. Please try again.';
+      }
+      
+      return data.reply;
+    } catch (err: any) {
       console.error('Chat error:', err);
-      return 'Sorry, I had trouble reaching the AI service. Please try again.';
+      return err.message || 'Sorry, I had trouble reaching the AI service. Please check your connection and try again.';
     }
   };
 

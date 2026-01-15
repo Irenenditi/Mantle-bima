@@ -3,17 +3,34 @@ import cors from "cors";
 import multer, { FileFilterCallback } from "multer";
 import * as path from "path";
 import * as fs from "fs-extra";
+import * as nodeFs from "fs";
 import { v4 as uuidv4 } from "uuid";
 import * as dotenv from "dotenv";
 import OpenAI from "openai";
 import { dbHelpers } from "./database";
 import type { ListingInput, StatusUpdate } from "./types";
 
-dotenv.config({ path: path.join(__dirname, "..", ".env") });
+// Load .env file - try multiple paths to handle both dev and compiled scenarios
+const envPath = path.join(__dirname, "..", ".env");
+dotenv.config({ path: envPath });
+
+// Also try loading from current working directory as fallback
+if (!process.env.OPENAI_API_KEY) {
+  dotenv.config({ path: path.join(process.cwd(), ".env") });
+}
+
+// Debug: Log if API key is loaded (without exposing the key)
+console.log("Environment check:", {
+  envPath,
+  cwd: process.cwd(),
+  hasOpenAIKey: !!process.env.OPENAI_API_KEY,
+  openAIKeyLength: process.env.OPENAI_API_KEY?.length || 0,
+  model: process.env.OPENAI_MODEL || "gpt-4o-mini"
+});
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
 // Middleware
 app.use(cors());
@@ -75,39 +92,167 @@ const upload = multer({
 });
 
 // Chat proxy to OpenAI (secure, uses backend API key)
+// Enhanced with marketplace context and better responses
 app.post("/api/chat", async (req: Request, res: Response) => {
   try {
     const { messages } = req.body || {};
+    
+    console.log("Chat request received:", { 
+      messageCount: messages?.length,
+      hasMessages: Array.isArray(messages) && messages.length > 0 
+    });
+    
     if (!Array.isArray(messages) || messages.length === 0) {
-      return res.status(400).json({ error: "Missing messages array" });
+      console.error("Invalid messages array:", messages);
+      return res.status(400).json({ error: "Missing or invalid messages array" });
     }
 
+    // Check for API key with better debugging
     if (!process.env.OPENAI_API_KEY) {
-      return res
-        .status(500)
-        .json({ error: "OPENAI_API_KEY not configured on server" });
+      console.error("OPENAI_API_KEY not found in environment!", {
+        envKeys: Object.keys(process.env).filter(k => k.includes("OPENAI")),
+        __dirname,
+        cwd: process.cwd(),
+        envPath: path.join(__dirname, "..", ".env"),
+        envFileExists: nodeFs.existsSync(path.join(__dirname, "..", ".env"))
+      });
+      return res.json({ 
+        reply: "I'm currently unavailable as the OpenAI API key is not configured. The server needs to be restarted to load the API key from the .env file. Please restart the backend server." 
+      });
     }
+    
+    console.log("Using OpenAI API key (length:", process.env.OPENAI_API_KEY.length + ")");
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+    // Get marketplace context to provide helpful information
+    let marketplaceContext = "";
+    try {
+      const listings = dbHelpers.getAllListings();
+      const totalListings = listings.length;
+      const verifiedListings = listings.filter(l => 
+        l.status === "verified" || l.status === "minted"
+      ).length;
+      const pendingListings = listings.filter(l => 
+        l.status === "pending" || l.status === "pending_verification"
+      ).length;
+
+      marketplaceContext = `\n\nCurrent Marketplace Status:
+- Total listings: ${totalListings}
+- Verified/minted listings: ${verifiedListings}
+- Pending verification: ${pendingListings}
+
+Available locations include: ${[...new Set(listings.map(l => l.location).filter(Boolean))].slice(0, 5).join(", ") || "Various locations"}`;
+    } catch (err) {
+      // If we can't get listings, continue without context
+      console.log("Could not fetch marketplace context for chatbot:", err);
+    }
+
+    // Enhanced system prompt with marketplace knowledge
+    const enhancedSystemPrompt = `You are BIMA Assistant, a helpful and knowledgeable AI assistant for the BIMA Land Marketplace platform. 
+
+BIMA is a blockchain-powered land marketplace built on Mantle Network that enables:
+- Secure land listing and verification
+- NFT-based land ownership representation
+- Transparent property transactions
+- Inspector verification system
+- IPFS-based document storage
+
+Key Features:
+- Sellers can list their land parcels with documents (title deeds, survey maps)
+- Properties go through verification by inspectors before being minted as NFTs
+- Buyers can browse verified land listings on the marketplace
+- All transactions are recorded on the Mantle blockchain
+- Documents are stored on IPFS for permanent, decentralized access
+
+Your role:
+- Help users understand how to use the platform
+- Answer questions about land listings, verification process, and transactions
+- Provide information about available properties when asked
+- Guide users through the listing or buying process
+- Be friendly, concise, and professional
+- If you don't know something specific, direct users to browse the marketplace or contact support
+
+${marketplaceContext}
+
+Remember to be helpful, accurate, and encourage users to explore the marketplace for the latest listings.`;
+
+    // Build messages array - use enhanced system prompt, then user messages
+    // Remove any existing system messages and prepend our enhanced one
+    const userMessages = messages.filter(m => m.role !== "system");
+    const messagesToSend = [
+      { role: "system", content: enhancedSystemPrompt },
+      ...userMessages
+    ];
+
+    console.log("Sending to OpenAI:", { 
+      model: MODEL, 
+      messageCount: messagesToSend.length,
+      firstMessage: messagesToSend[0]?.role 
+    });
+
     const completion = await openai.chat.completions.create({
       model: MODEL,
-      messages,
+      messages: messagesToSend,
       temperature: 0.7,
+      max_tokens: 500, // Limit response length for better UX
+      presence_penalty: 0.6, // Encourage diverse responses
+      frequency_penalty: 0.3,
     });
 
     const reply = completion.choices?.[0]?.message?.content || "";
+    
+    console.log("OpenAI response received:", { 
+      hasReply: !!reply, 
+      replyLength: reply.length 
+    });
+    
+    // Ensure we have a valid reply
+    if (!reply || reply.trim().length === 0) {
+      console.warn("Empty reply from OpenAI");
+      return res.json({ 
+        reply: "I apologize, but I couldn't generate a response. Please try rephrasing your question or check back later." 
+      });
+    }
+
     return res.json({ reply });
   } catch (error: any) {
+    // Enhanced error handling
+    console.error("Chat endpoint error:", {
+      name: error?.name,
+      message: error?.message,
+      status: error?.response?.status,
+      statusText: error?.response?.statusText,
+      data: error?.response?.data,
+      stack: error?.stack
+    });
+
+    let errorMessage = "Failed to get response from model";
+    let statusCode = 500;
+    
+    if (error?.response?.status === 401) {
+      errorMessage = "OpenAI API key is invalid or expired. Please check server configuration.";
+      statusCode = 500;
+    } else if (error?.response?.status === 429) {
+      errorMessage = "Rate limit exceeded. Please try again in a moment.";
+      statusCode = 429;
+    } else if (error?.response?.status === 503) {
+      errorMessage = "OpenAI service is temporarily unavailable. Please try again later.";
+      statusCode = 503;
+    } else if (error?.code === "ECONNREFUSED" || error?.message?.includes("fetch")) {
+      errorMessage = "Could not connect to OpenAI service. Please check your internet connection.";
+      statusCode = 503;
+    }
+
     const errPayload = error?.response?.data || {
       message: error.message || "Unknown error",
     };
-    console.error("OpenAI proxy error:", errPayload);
-    const payload =
-      process.env.NODE_ENV === "production"
-        ? { error: "Failed to get response from model" }
-        : { error: "Failed to get response from model", details: errPayload };
-    return res.status(500).json(payload);
+    
+    // Return error in reply format so frontend can display it
+    return res.status(statusCode).json({ 
+      reply: errorMessage,
+      error: true 
+    });
   }
 });
 
