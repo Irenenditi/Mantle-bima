@@ -626,9 +626,10 @@ export default function Hero() {
             let imageUrl: string | undefined;
             if (p.metadataHash) {
               try {
-                const r = await fetch(
-                  `https://gateway.pinata.cloud/ipfs/${p.metadataHash}`,
-                );
+                const metaUrl = p.metadataHash.startsWith("http")
+                  ? p.metadataHash
+                  : `https://gateway.pinata.cloud/ipfs/${p.metadataHash}`;
+                const r = await fetch(metaUrl);
                 if (r.ok) {
                   const j = await r.json();
                   let first =

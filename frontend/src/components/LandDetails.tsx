@@ -113,12 +113,13 @@ const LandDetails: React.FC = () => {
 
         // Process Mantle listing only
 
-        // For Mantle listings, fetch metadata from IPFS
+        // For Mantle / local listings, fetch metadata from IPFS or local URL
         if (match.metadataHash) {
           try {
-            const m = await fetch(
-              `https://gateway.pinata.cloud/ipfs/${match.metadataHash}?cb=${Date.now()}`,
-            );
+            const metaUrl = match.metadataHash.startsWith("http")
+              ? `${match.metadataHash}?cb=${Date.now()}`
+              : `https://gateway.pinata.cloud/ipfs/${match.metadataHash}?cb=${Date.now()}`;
+            const m = await fetch(metaUrl);
             if (m.ok) meta = await m.json();
           } catch {}
         }

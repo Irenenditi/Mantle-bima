@@ -192,9 +192,10 @@ export default function SellerDashboard() {
   const openEdit = async (listing: any) => {
     try {
       if (!listing?.metadataHash) return;
-      const r = await fetch(
-        `https://gateway.pinata.cloud/ipfs/${listing.metadataHash}?cb=${Date.now()}`,
-      );
+      const metaUrl = listing.metadataHash.startsWith("http")
+        ? `${listing.metadataHash}?cb=${Date.now()}`
+        : `https://gateway.pinata.cloud/ipfs/${listing.metadataHash}?cb=${Date.now()}`;
+      const r = await fetch(metaUrl);
       const meta = r.ok ? await r.json() : {};
       setEditTarget(listing);
       setEditMeta(meta);
@@ -798,7 +799,7 @@ export default function SellerDashboard() {
                             ? "Minting..."
                             : "Mint NFT (Mantle)"}
                         </button>
-                        {listing.metadataHash && (
+                        {listing.metadataHash && !listing.metadataHash.startsWith("http") && (
                           <a
                             href={`https://gateway.pinata.cloud/ipfs/${listing.metadataHash}`}
                             target="_blank"

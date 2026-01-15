@@ -222,6 +222,18 @@ app.post("/nft/create", (req: Request, res: Response) => {
   });
 });
 
+// Stub NFT mint endpoint so `api.mintLandNFT` works in local dev without errors.
+app.post("/nft/mint", (req: Request, res: Response) => {
+  const { tokenId, metadata } = req.body || {};
+  return res.json({
+    ok: true,
+    tokenId,
+    metadata,
+    txId: "0.0.0@0.0.0", // dummy transaction id
+    message: "NFT mint stubbed in local backend",
+  });
+});
+
 // Stub land verification endpoint to satisfy `api.verifyLand` calls in local dev.
 app.post("/land/verify", (req: Request, res: Response) => {
   try {
