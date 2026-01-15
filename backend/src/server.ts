@@ -166,7 +166,10 @@ app.post("/ipfs/upload-json", async (req: Request, res: Response) => {
     const fullPath = path.join(ipfsDir, filename);
     await fs.writeJson(fullPath, payload, { spaces: 2 });
 
-    const ipfsHash = `local-json-${uuidv4()}`;
+    // For local dev, make the "hash" equal to the local gateway URL
+    // so when the frontend calls https://gateway.pinata.cloud/ipfs/<hash>
+    // it can instead be detected and proxied or simply ignored.
+    const ipfsHash = `${process.env.LOCAL_IPFS_GATEWAY || "http://localhost:5000"}/storage/ipfs/${filename}`;
 
     return res.json({
       ipfsHash,
@@ -216,6 +219,21 @@ app.post("/nft/create", (req: Request, res: Response) => {
     price,
     location,
     message: "NFT creation stubbed in local backend",
+  });
+});
+
+// Stub land verification endpoint to satisfy `api.verifyLand` calls in local dev.
+app.post("/land/verify", (req: Request, res: Response) => {
+  const { landId, role, name, tokenId } = req.body || {};
+  return res.json({
+    ok: true,
+    verified: true,
+    status: "pending",
+    landId,
+    role,
+    name,
+    tokenId,
+    message: "Land verification stubbed in local backend",
   });
 });
 

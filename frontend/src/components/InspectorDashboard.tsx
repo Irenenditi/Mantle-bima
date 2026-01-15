@@ -35,7 +35,7 @@ interface InspectorStats {
 }
 
 type VerifyForm = { landId: string; role: 'Chief' | 'Surveyor'; name: string };
-type Parcel = { landId: number; status: string; location?: string; size?: string; price?: string; metadataHash?: string };
+type Parcel = { landId: string | number; status: string; location?: string; size?: string; price?: string; metadataHash?: string };
 
 const mockRequests: VerificationRequest[] = [
   {
@@ -168,13 +168,14 @@ export default function InspectorDashboard() {
     setVerifyMsg(null);
     try {
       setSubmitting(true);
-      const landIdNum = Number(verifyForm.landId);
-      if (!Number.isFinite(landIdNum)) {
+      const landId = (verifyForm.landId || '').trim();
+      if (!landId) {
         setVerifyMsg('Invalid Land ID');
         return;
       }
-      // Send role exactly as backend expects (e.g., "Chief" or "Surveyor") and include tokenId
-      const body = { landId: landIdNum, role: verifyForm.role as any, name: verifyForm.name, tokenId: TOKEN_ID };
+      // Land IDs can be UUID strings (local backend) or numbers (Mantle).
+      // Send as string; backend stubs accept it and Mantle backend can coerce if needed.
+      const body = { landId, role: verifyForm.role as any, name: verifyForm.name, tokenId: TOKEN_ID };
       const res = await api.verifyLand(body);
       setVerifyMsg(`Success. Verified: ${String(res?.verified)}. Status: ${res?.status ?? res?.state ?? 'updated'}.`);
       await loadPendingParcels();
