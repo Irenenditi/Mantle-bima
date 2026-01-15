@@ -2,6 +2,7 @@ import { motion, useInView } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
+import { resolveIpfsUrlAsync } from "../lib/ipfs";
 import {
   MapPin,
   Shield,
@@ -616,19 +617,22 @@ export default function Hero() {
   const fetchListings = async () => {
     setIsLoading(true);
     try {
-      // Fetch from Mantle backend (minted parcels)
+      // Fetch ALL parcels (not just minted) so newly listed land appears immediately
       let MantleListings: LandListing[] = [];
       try {
-        const res = await api.getParcels("minted");
+        // Fetch all parcels - no status filter so we show pending, verified, and minted listings
+        const res = await api.getParcels();
         const items = Array.isArray(res?.items) ? res.items : [];
         MantleListings = await Promise.all(
           items.map(async (p: any) => {
             let imageUrl: string | undefined;
             if (p.metadataHash) {
               try {
+                // Resolve metadata URL (handles local hashes via resolver)
                 const metaUrl = p.metadataHash.startsWith("http")
                   ? p.metadataHash
-                  : `https://gateway.pinata.cloud/ipfs/${p.metadataHash}`;
+                  : await resolveIpfsUrlAsync(p.metadataHash);
+                if (!metaUrl) throw new Error("Invalid metadataHash");
                 const r = await fetch(metaUrl);
                 if (r.ok) {
                   const j = await r.json();
@@ -648,29 +652,42 @@ export default function Hero() {
                     typeof first === "string"
                       ? first
                       : first?.cid || first?.ipfsHash || first?.hash;
+                  // Resolve image URL (handles local hashes via resolver)
                   imageUrl = cid
-                    ? `https://gateway.pinata.cloud/ipfs/${cid}`
+                    ? await resolveIpfsUrlAsync(cid, { isImage: true }) || undefined
                     : (first?.url as string | undefined);
                 }
               } catch {}
             }
+            
+            // Map backend status to verificationStatus for UI
+            const backendStatus = String(p.status || "").toLowerCase();
+            let verificationStatus: "verified" | "pending" | "in-progress" | "unverified" = "unverified";
+            if (backendStatus === "minted" || backendStatus === "verified") {
+              verificationStatus = "verified";
+            } else if (backendStatus === "pending" || backendStatus === "pending_verification") {
+              verificationStatus = "pending";
+            } else if (backendStatus === "in-progress" || backendStatus === "in_progress") {
+              verificationStatus = "in-progress";
+            }
+            
             return {
               id: String(p.landId),
               location: p.location || "Unknown",
               area: p.size || "",
               price: (p.price ?? "").toString(),
-              title: p.location || undefined,
-              verificationStatus: "verified" as const,
+              title: p.title || p.location || undefined,
+              verificationStatus,
               inspectors: 2,
               imageGradient:
                 "from-blue-500/20 via-indigo-500/20 to-purple-500/20",
               lastUpdated: new Date(
-                p.submittedAt || Date.now(),
+                p.createdAt || p.submittedAt || Date.now(),
               ).toLocaleDateString(),
               imageUrl,
-              description: undefined,
-              landType: undefined,
-              seller: undefined,
+              description: p.description || undefined,
+              landType: p.landType || undefined,
+              seller: p.seller || undefined,
             } as LandListing;
           }),
         );

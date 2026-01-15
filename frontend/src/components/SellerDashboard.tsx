@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { api } from "../lib/api";
+import { resolveIpfsUrl, resolveIpfsUrlAsync } from "../lib/ipfs";
 
 interface LandListing {
   id: string;
@@ -194,7 +195,8 @@ export default function SellerDashboard() {
       if (!listing?.metadataHash) return;
       const metaUrl = listing.metadataHash.startsWith("http")
         ? `${listing.metadataHash}?cb=${Date.now()}`
-        : `https://gateway.pinata.cloud/ipfs/${listing.metadataHash}?cb=${Date.now()}`;
+        : await resolveIpfsUrlAsync(listing.metadataHash, { cacheBust: true });
+      if (!metaUrl) throw new Error("Could not resolve metadata URL");
       const r = await fetch(metaUrl);
       const meta = r.ok ? await r.json() : {};
       setEditTarget(listing);
@@ -799,9 +801,9 @@ export default function SellerDashboard() {
                             ? "Minting..."
                             : "Mint NFT (Mantle)"}
                         </button>
-                        {listing.metadataHash && !listing.metadataHash.startsWith("http") && (
+                        {listing.metadataHash && (
                           <a
-                            href={`https://gateway.pinata.cloud/ipfs/${listing.metadataHash}`}
+                            href={resolveIpfsUrl(listing.metadataHash) || undefined}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-3 py-1 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-500/10 text-sm"

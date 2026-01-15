@@ -1,0 +1,25 @@
+{
+  "title": "lowe",
+  "size": "2.5",
+  "price": "3450000",
+  "location": "abuja",
+  "description": "is d",
+  "landType": "commercial",
+  "zoning": "resedentila",
+  "utilities": "water",
+  "accessibility": "private",
+  "nearbyAmenities": "schoold",
+  "seller": {
+    "name": "Mogaka mokaya",
+    "phone": "+254746271236",
+    "email": "mokayaj857@gmail.com"
+  },
+  "images": [
+    {
+      "cid": "local-d08814f3-ed2e-4778-98e0-f656a09a1037"
+    }
+  ],
+  "documents": [],
+  "timestamp": "2026-01-15T10:35:51.261Z",
+  "status": "pending"
+}

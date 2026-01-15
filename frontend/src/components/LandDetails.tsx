@@ -22,7 +22,8 @@ import {
   Zap,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { api } from "../lib/api";
+import { api, API_BASE_URL } from "../lib/api";
+import { resolveIpfsUrl, resolveIpfsUrlAsync } from "../lib/ipfs";
 
 // Route-driven component: landId is read from URL params
 
@@ -117,45 +118,86 @@ const LandDetails: React.FC = () => {
         if (match.metadataHash) {
           try {
             const metaUrl = match.metadataHash.startsWith("http")
-              ? `${match.metadataHash}?cb=${Date.now()}`
-              : `https://gateway.pinata.cloud/ipfs/${match.metadataHash}?cb=${Date.now()}`;
+              ? match.metadataHash
+              : await resolveIpfsUrlAsync(match.metadataHash);
+            if (!metaUrl) throw new Error("Invalid metadataHash");
             const m = await fetch(metaUrl);
             if (m.ok) meta = await m.json();
           } catch {}
         }
-        // Normalize images and documents from metadata (support old and new formats)
-        const imagesFromMeta: any[] = (() => {
-          const prefer = (arr: any) =>
-            Array.isArray(arr) && arr.length > 0 ? arr : null;
-          const imgs =
-            prefer(meta?.images) || prefer(meta?.photos) || prefer(meta?.media);
-          if (imgs) return imgs;
-          // single image field
-          if (typeof meta?.image === "string") return [meta.image];
-          // backward-compat: documents.additional used to hold image hashes
-          const add = meta?.documents?.additional;
-          if (Array.isArray(add) && add.length > 0) return add;
-          // last resort: scan for first CID-like string in metadata
-          const cidRegex = /Qm[1-9A-Za-z]{44}/;
-          const scan = (obj: any): string | null => {
-            if (!obj) return null;
-            if (typeof obj === "string" && cidRegex.test(obj)) return obj;
-            if (Array.isArray(obj)) {
-              for (const v of obj) {
-                const f = scan(v);
-                if (f) return f;
+        // Prioritize images from database (they have actual paths), fallback to metadata
+        let imagesToUse: any[] = [];
+        
+        // First, use images from database if available (they have path fields)
+        if (match.images && Array.isArray(match.images) && match.images.length > 0) {
+          imagesToUse = match.images.map((img: any) => ({
+            ...img,
+            url: img.path ? `${API_BASE_URL}${img.path}` : null,
+            cid: img.path,
+          }));
+        } else {
+          // Fallback to metadata images
+          const imagesFromMeta: any[] = (() => {
+            const prefer = (arr: any) =>
+              Array.isArray(arr) && arr.length > 0 ? arr : null;
+            const imgs =
+              prefer(meta?.images) || prefer(meta?.photos) || prefer(meta?.media);
+            if (imgs) return imgs;
+            // single image field
+            if (typeof meta?.image === "string") return [meta.image];
+            // backward-compat: documents.additional used to hold image hashes
+            const add = meta?.documents?.additional;
+            if (Array.isArray(add) && add.length > 0) return add;
+            // last resort: scan for first CID-like string in metadata
+            const cidRegex = /Qm[1-9A-Za-z]{44}/;
+            const scan = (obj: any): string | null => {
+              if (!obj) return null;
+              if (typeof obj === "string" && cidRegex.test(obj)) return obj;
+              if (Array.isArray(obj)) {
+                for (const v of obj) {
+                  const f = scan(v);
+                  if (f) return f;
+                }
+              } else if (typeof obj === "object") {
+                for (const k of Object.keys(obj)) {
+                  const f = scan(obj[k]);
+                  if (f) return f;
+                }
               }
-            } else if (typeof obj === "object") {
-              for (const k of Object.keys(obj)) {
-                const f = scan(obj[k]);
-                if (f) return f;
+              return null;
+            };
+            const found = scan(meta);
+            return found ? [found] : [];
+          })();
+
+          // Resolve image URLs asynchronously from metadata
+          imagesToUse = await Promise.all(
+            imagesFromMeta.map(async (img: any) => {
+              const cid =
+                typeof img === "string"
+                  ? img
+                  : img?.cid || img?.ipfsHash || img?.hash || img?.image;
+              if (cid) {
+                // If it's already a full URL, use it directly
+                if (cid.startsWith("http")) {
+                  return {
+                    ...(typeof img === "object" ? img : {}),
+                    cid,
+                    url: cid,
+                  };
+                }
+                // Otherwise, try to resolve it
+                const resolvedUrl = await resolveIpfsUrlAsync(cid, { isImage: true });
+                return {
+                  ...(typeof img === "object" ? img : {}),
+                  cid,
+                  url: resolvedUrl || img?.url,
+                };
               }
-            }
-            return null;
-          };
-          const found = scan(meta);
-          return found ? [found] : [];
-        })();
+              return img;
+            })
+          );
+        }
 
         const documentsFromMeta: any[] = (() => {
           if (Array.isArray(meta?.documents)) return meta.documents;
@@ -180,6 +222,15 @@ const LandDetails: React.FC = () => {
         })();
 
         const formattedPrice = match?.price ? String(match.price) : "0";
+        const backendStatus = String(match.status || "").toLowerCase();
+        const verificationStatus =
+          backendStatus === "minted" || backendStatus === "verified"
+            ? "verified"
+            : backendStatus === "pending" ||
+                backendStatus === "pending_verification"
+              ? "pending"
+              : "unverified";
+
         setProperty({
           id: String(match.landId),
           title: meta?.title || match.location || "Property",
@@ -196,12 +247,7 @@ const LandDetails: React.FC = () => {
             phone: meta?.owner?.phone || "",
             email: meta?.owner?.email || "",
           },
-          verificationStatus:
-            match.status === "minted"
-              ? "verified"
-              : match.status === "pending"
-                ? "pending"
-                : "unverified",
+          verificationStatus,
           listedDate: match.submittedAt
             ? new Date(match.submittedAt).toLocaleDateString()
             : "N/A",
@@ -212,7 +258,7 @@ const LandDetails: React.FC = () => {
               : "N/A",
           views: 0,
           inspections: match.approvals?.length ?? 0,
-          images: imagesFromMeta,
+          images: imagesToUse,
           documents: documentsFromMeta,
           metadataHash: match.metadataHash || null,
           nftSerial: match.nftSerial,
@@ -233,16 +279,28 @@ const LandDetails: React.FC = () => {
   const images: PropertyImage[] =
     property?.images?.length > 0
       ? property.images.map((img: any, index: number) => {
-          const cid =
-            typeof img === "string"
-              ? img
-              : img?.cid || img?.ipfsHash || img?.hash || img?.image;
-          const url = img?.path
-            ? `http://localhost:5000${img.path}`
-            : cid
-              ? `https://gateway.pinata.cloud/ipfs/${cid}`
-              : img?.url ||
-                `https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop`;
+          // Prioritize resolved URL, then path, then try to resolve cid
+          let url = img?.url;
+          if (!url && img?.path) {
+            url = img.path.startsWith("http") 
+              ? img.path 
+              : `${API_BASE_URL}${img.path}`;
+          }
+          if (!url) {
+            const cid =
+              typeof img === "string"
+                ? img
+                : img?.cid || img?.ipfsHash || img?.hash || img?.image;
+            if (cid && cid.startsWith("http")) {
+              url = cid;
+            } else if (cid) {
+              url = resolveIpfsUrl(cid) || undefined;
+            }
+          }
+          // Fallback to placeholder
+          if (!url) {
+            url = `https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop`;
+          }
           return {
             id: index.toString(),
             url,
@@ -818,9 +876,7 @@ const LandDetails: React.FC = () => {
                                 <div className="flex items-center gap-2">
                                   <a
                                     href={
-                                      doc.cid
-                                        ? `https://gateway.pinata.cloud/ipfs/${doc.cid}`
-                                        : "#"
+                                      resolveIpfsUrl(doc.cid) || "#"
                                     }
                                     target={doc.cid ? "_blank" : undefined}
                                     rel="noreferrer"
@@ -830,8 +886,8 @@ const LandDetails: React.FC = () => {
                                   </a>
                                   <a
                                     href={
-                                      doc.cid
-                                        ? `https://gateway.pinata.cloud/ipfs/${doc.cid}?download=1`
+                                      resolveIpfsUrl(doc.cid)
+                                        ? `${resolveIpfsUrl(doc.cid)}?download=1`
                                         : "#"
                                     }
                                     target={doc.cid ? "_blank" : undefined}
@@ -1126,7 +1182,7 @@ const LandDetails: React.FC = () => {
                       </div>
                       <a
                         className="text-xs font-mono underline text-blue-500 break-all"
-                        href={`https://gateway.pinata.cloud/ipfs/${property.metadataHash}`}
+                        href={resolveIpfsUrl(property.metadataHash) || "#"}
                         target="_blank"
                         rel="noopener noreferrer"
                       >

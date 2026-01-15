@@ -1,0 +1,25 @@
+{
+  "title": "surswe",
+  "location": "london",
+  "size": "3.5",
+  "price": "34000",
+  "description": "ideal for vor",
+  "landType": "industrial",
+  "zoning": "resedential",
+  "utilities": "water",
+  "accessibility": "footpath",
+  "nearbyAmenities": "centres",
+  "sellerName": "elizabeth njeri",
+  "sellerPhone": "+2547838993210",
+  "sellerEmail": "mokayaj8573@gmail.com",
+  "images": [
+    "local-03852610-16c4-4ab8-9eab-988b0555ac02"
+  ],
+  "documents": {
+    "titleDeed": "local-51f28e3e-b940-4b06-9594-f14ff95f44c6",
+    "surveyReport": null,
+    "taxCertificate": null
+  },
+  "timestamp": "2026-01-15T09:50:41.651Z",
+  "status": "pending"
+}

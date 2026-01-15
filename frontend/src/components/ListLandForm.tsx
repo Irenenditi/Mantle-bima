@@ -4,6 +4,7 @@ import { Upload, MapPin, DollarSign, FileText, ArrowRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { api } from '../lib/api';
+import { resolveIpfsUrl } from '../lib/ipfs';
 
 interface FormData {
   size: string;
@@ -78,11 +79,16 @@ export const ListLandForm = () => {
       };
       // Check propagation (optional)
       if (ipfsHash) {
-        const gatewayUrl = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+        const gatewayUrl = resolveIpfsUrl(ipfsHash);
         try {
-          const resp = await fetch(gatewayUrl, { method: 'HEAD' });
-          fileData.gatewayOk = resp.ok;
-          fileData.status = resp.ok ? 'success' : 'error';
+          if (gatewayUrl) {
+            const resp = await fetch(gatewayUrl, { method: 'HEAD' });
+            fileData.gatewayOk = resp.ok;
+            fileData.status = resp.ok ? 'success' : 'error';
+          } else {
+            fileData.gatewayOk = false;
+            fileData.status = 'error';
+          }
         } catch {
           fileData.gatewayOk = false;
           fileData.status = 'error';
@@ -284,7 +290,7 @@ export const ListLandForm = () => {
                   <>
                     <span className="text-green-600 font-semibold">✓ Uploaded</span>
                     <a
-                      href={`https://gateway.pinata.cloud/ipfs/${files.ownershipProof.hash}`}
+                      href={resolveIpfsUrl(files.ownershipProof.hash) || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="underline text-blue-500"
@@ -323,7 +329,7 @@ export const ListLandForm = () => {
                   <>
                     <span className="text-green-600 font-semibold">✓ Uploaded</span>
                     <a
-                      href={`https://gateway.pinata.cloud/ipfs/${files.surveyMap.hash}`}
+                      href={resolveIpfsUrl(files.surveyMap.hash) || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="underline text-blue-500"
@@ -364,7 +370,7 @@ export const ListLandForm = () => {
                       <>
                         <span className="text-green-600 font-semibold">✓ Uploaded</span>
                         <a
-                          href={`https://gateway.pinata.cloud/ipfs/${doc.hash}`}
+                          href={resolveIpfsUrl(doc.hash) || "#"}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="underline text-blue-500"

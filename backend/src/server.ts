@@ -140,14 +140,20 @@ app.post("/ipfs/upload", upload.single("file"), (req: Request, res: Response) =>
     return res.status(400).json({ error: "No file provided" });
   }
 
-  // For now we generate a local pseudo-hash instead of real IPFS
-  const ipfsHash = `local-${uuidv4()}`;
+  // Local dev: we are NOT uploading to real IPFS.
+  // Return a stable, directly fetchable URL so the frontend doesn't try to treat it like a CID.
+  const baseUrl = process.env.LOCAL_IPFS_GATEWAY || "http://localhost:5000";
+  const isImage = (file.mimetype || "").startsWith("image/");
+  const relativeUrl = isImage
+    ? `/storage/uploads/images/${file.filename}`
+    : `/storage/uploads/documents/${file.filename}`;
+  const ipfsHash = `${baseUrl}${relativeUrl}`;
 
   // Return the shape expected by the frontend: { ipfsHash, url? }
   return res.json({
     ipfsHash,
     filename: file.filename,
-    url: `/storage/uploads/documents/${file.filename}`,
+    url: relativeUrl,
   });
 });
 
@@ -207,19 +213,112 @@ app.post("/listings", (req: Request, res: Response) => {
   });
 });
 
-// Stub Mantle NFT create endpoint so `api.createLandNFT` does not 404 in local dev.
-// In production this would live in the real Mantle service.
-app.post("/nft/create", (req: Request, res: Response) => {
-  const { metadataHash, size, price, location } = req.body || {};
-  // Just acknowledge the request; the frontend only checks that it doesn't throw.
-  return res.json({
-    ok: true,
-    metadataHash,
-    size,
-    price,
-    location,
-    message: "NFT creation stubbed in local backend",
-  });
+// Mantle NFT create endpoint - creates a listing in the database so it appears in marketplace
+// In production this would also interact with the Mantle blockchain service.
+app.post("/nft/create", async (req: Request, res: Response) => {
+  try {
+    const { metadataHash, size, price, location } = req.body || {};
+    
+    if (!metadataHash || !size || !price || !location) {
+      return res.status(400).json({ 
+        error: "metadataHash, size, price, and location are required" 
+      });
+    }
+
+    // Try to fetch metadata from IPFS/local storage to get additional fields
+    let metadata: any = {};
+    try {
+      // Handle local IPFS hashes (http://localhost:5000/storage/ipfs/...)
+      let metaUrl = metadataHash;
+      if (!metadataHash.startsWith("http")) {
+        // Try to resolve as local file first
+        const localPath = path.join(__dirname, "..", "storage", "ipfs");
+        const files = await fs.readdir(localPath);
+        const matchingFile = files.find(f => metadataHash.includes(f) || f.includes(metadataHash.split("-").pop() || ""));
+        if (matchingFile) {
+          metaUrl = `http://localhost:5000/storage/ipfs/${matchingFile}`;
+        } else {
+          // Fallback to gateway (though this won't work for local-* hashes)
+          metaUrl = `https://gateway.pinata.cloud/ipfs/${metadataHash}`;
+        }
+      }
+      
+      // Fetch metadata
+      const metaResponse = await fetch(metaUrl);
+      if (metaResponse.ok) {
+        metadata = await metaResponse.json();
+      }
+    } catch (err) {
+      console.log("Could not fetch metadata, using provided fields only:", err);
+    }
+
+    // Create listing data - use metadata if available, otherwise use provided fields
+    const listingId = uuidv4();
+    const listingData: ListingInput & {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      status: string;
+    } = {
+      id: listingId,
+      title: metadata.title || location || "Land Parcel",
+      location: location,
+      size: size,
+      price: parseFloat(String(price)),
+      description: metadata.description || "",
+      landType: metadata.landType || null,
+      zoning: metadata.zoning || null,
+      accessibility: metadata.accessibility || null,
+      metadataHash: metadataHash,
+      status: "pending_verification", // New listings start as pending verification
+      sellerName: metadata.owner?.name || metadata.sellerName || null,
+      sellerPhone: metadata.owner?.phone || metadata.sellerPhone || null,
+      sellerEmail: metadata.owner?.email || metadata.sellerEmail || null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      images: metadata.images?.map((img: any) => {
+        const imgHash = typeof img === "string" ? img : img.cid || img.ipfsHash || img.hash;
+        return {
+          filename: `${imgHash}.jpg`,
+          originalName: typeof img === "string" ? `${imgHash}.jpg` : img.name || `${imgHash}.jpg`,
+          path: imgHash.startsWith("http") ? imgHash : `/storage/uploads/images/${imgHash}.jpg`,
+        };
+      }) || [],
+      documents: metadata.documents ? {
+        titleDeed: metadata.documents.ownershipProof ? {
+          filename: `${metadata.documents.ownershipProof}.pdf`,
+          originalName: "title_deed.pdf",
+          path: `/storage/uploads/documents/${metadata.documents.ownershipProof}.pdf`,
+        } : undefined,
+        surveyReport: metadata.documents.surveyMap ? {
+          filename: `${metadata.documents.surveyMap}.pdf`,
+          originalName: "survey_map.pdf",
+          path: `/storage/uploads/documents/${metadata.documents.surveyMap}.pdf`,
+        } : undefined,
+      } : undefined,
+      utilities: metadata.utilities || [],
+      nearbyAmenities: metadata.nearbyAmenities || [],
+    };
+
+    // Save to database
+    const newListing = dbHelpers.createListing(listingData);
+
+    return res.json({
+      ok: true,
+      landId: listingId,
+      metadataHash,
+      size,
+      price,
+      location,
+      message: "Listing created successfully",
+    });
+  } catch (error) {
+    console.error("Error in /nft/create:", error);
+    return res.status(500).json({ 
+      error: "Failed to create listing",
+      message: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
 });
 
 // Stub NFT mint endpoint so `api.mintLandNFT` works in local dev without errors.
@@ -296,6 +395,54 @@ app.post("/land/verify", (req: Request, res: Response) => {
   }
 });
 
+// Resolve local IPFS hash to actual file URL
+// This helps the frontend find files when metadata only contains "local-xxx" hashes
+app.get("/ipfs/resolve/:hash", async (req: Request, res: Response) => {
+  try {
+    const hash = req.params.hash;
+    if (!hash || !hash.startsWith("local-")) {
+      return res.status(400).json({ error: "Invalid local hash format" });
+    }
+
+    // Extract UUID part from hash (local-xxx or local-json-xxx)
+    const uuidPart = hash.replace(/^local-json-/, "").replace(/^local-/, "");
+    
+    // Search in both images and documents directories
+    const imagesDir = path.join(__dirname, "..", "storage", "uploads", "images");
+    const documentsDir = path.join(__dirname, "..", "storage", "uploads", "documents");
+    const ipfsDir = path.join(__dirname, "..", "storage", "ipfs");
+
+    const searchDirs = [imagesDir, documentsDir, ipfsDir];
+    
+    for (const dir of searchDirs) {
+      try {
+        const files = await fs.readdir(dir);
+        // Find file that contains the UUID part
+        const matchingFile = files.find(f => f.includes(uuidPart));
+        if (matchingFile) {
+          const relativePath = dir === ipfsDir 
+            ? `/storage/ipfs/${matchingFile}`
+            : dir === imagesDir
+              ? `/storage/uploads/images/${matchingFile}`
+              : `/storage/uploads/documents/${matchingFile}`;
+          return res.json({ 
+            url: `${process.env.LOCAL_IPFS_GATEWAY || "http://localhost:5000"}${relativePath}`,
+            relativePath 
+          });
+        }
+      } catch (err) {
+        // Directory might not exist, continue searching
+        continue;
+      }
+    }
+
+    return res.status(404).json({ error: "File not found for hash" });
+  } catch (error) {
+    console.error("Error in /ipfs/resolve:", error);
+    return res.status(500).json({ error: "Failed to resolve hash" });
+  }
+});
+
 // Parcels endpoint used by `api.getParcels` – for now we expose all local listings
 // as "parcels" so discovery and details pages have something to render.
 app.get("/parcels", (req: Request, res: Response) => {
@@ -321,6 +468,7 @@ app.get("/parcels", (req: Request, res: Response) => {
       images: l.images,
       documents: l.documents,
       createdAt: l.createdAt,
+      submittedAt: l.createdAt, // Alias for compatibility
       updatedAt: l.updatedAt,
     }));
 

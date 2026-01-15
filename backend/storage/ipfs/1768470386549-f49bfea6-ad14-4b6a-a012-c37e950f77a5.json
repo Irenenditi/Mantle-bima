@@ -1,0 +1,31 @@
+{
+  "title": "mose",
+  "size": "2.3",
+  "price": "34000",
+  "location": "delaga",
+  "description": "",
+  "landType": "commercial",
+  "zoning": "",
+  "utilities": "sewer",
+  "accessibility": "murram",
+  "nearbyAmenities": "centres",
+  "seller": {
+    "name": "jude apne ",
+    "phone": "+254787680278",
+    "email": "mokayaj@ieee.org"
+  },
+  "images": [
+    {
+      "cid": "local-7f4438a5-4595-4b69-8bc3-769e5def17cd"
+    }
+  ],
+  "documents": [
+    {
+      "name": "Title Deed",
+      "type": "title-deed",
+      "cid": "local-5a500460-ccee-42c9-b178-dfdbb4438bed"
+    }
+  ],
+  "timestamp": "2026-01-15T09:46:26.349Z",
+  "status": "pending"
+}
