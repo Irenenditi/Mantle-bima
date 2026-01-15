@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build output
+dist/
+*.js.map
+*.d.ts.map
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Database files (optional - uncomment if you don't want to track DB)
+# storage/data/*.db
+# storage/data/*.db-shm
+# storage/data/*.db-wal
+
+# Uploads (optional - uncomment if you don't want to track uploads)
+# storage/uploads/
+

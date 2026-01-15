@@ -1,0 +1,510 @@
+import express, { Request, Response, NextFunction } from "express";
+import cors from "cors";
+import multer, { FileFilterCallback } from "multer";
+import * as path from "path";
+import * as fs from "fs-extra";
+import { v4 as uuidv4 } from "uuid";
+import * as dotenv from "dotenv";
+import OpenAI from "openai";
+import { dbHelpers } from "./database";
+import type { ListingInput, StatusUpdate } from "./types";
+
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+const MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use("/storage", express.static(path.join(__dirname, "..", "storage")));
+
+// Ensure upload/storage directories exist
+const storageRoot = path.join(__dirname, "..", "storage");
+fs.ensureDirSync(storageRoot);
+fs.ensureDirSync(path.join(storageRoot, "uploads", "images"));
+fs.ensureDirSync(path.join(storageRoot, "uploads", "documents"));
+fs.ensureDirSync(path.join(storageRoot, "ipfs"));
+
+// Configure multer for file uploads (all file writing goes under /storage)
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir =
+      file.fieldname === "images"
+        ? path.join(storageRoot, "uploads", "images")
+        : path.join(storageRoot, "uploads", "documents");
+    fs.ensureDirSync(uploadDir);
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${uuidv4()}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb: FileFilterCallback) => {
+    if (file.fieldname === "images") {
+      // Accept images only
+      if (file.mimetype.startsWith("image/")) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only image files are allowed for property images"));
+      }
+    } else {
+      // Accept documents (PDF, DOC, DOCX, etc.)
+      const allowedMimes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "image/jpeg",
+        "image/png",
+      ];
+      if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Invalid document format"));
+      }
+    }
+  },
+});
+
+// Chat proxy to OpenAI (secure, uses backend API key)
+app.post("/api/chat", async (req: Request, res: Response) => {
+  try {
+    const { messages } = req.body || {};
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: "Missing messages array" });
+    }
+
+    if (!process.env.OPENAI_API_KEY) {
+      return res
+        .status(500)
+        .json({ error: "OPENAI_API_KEY not configured on server" });
+    }
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+    const completion = await openai.chat.completions.create({
+      model: MODEL,
+      messages,
+      temperature: 0.7,
+    });
+
+    const reply = completion.choices?.[0]?.message?.content || "";
+    return res.json({ reply });
+  } catch (error: any) {
+    const errPayload = error?.response?.data || {
+      message: error.message || "Unknown error",
+    };
+    console.error("OpenAI proxy error:", errPayload);
+    const payload =
+      process.env.NODE_ENV === "production"
+        ? { error: "Failed to get response from model" }
+        : { error: "Failed to get response from model", details: errPayload };
+    return res.status(500).json(payload);
+  }
+});
+
+// Routes
+
+// ---------- Core Bima backend routes (used directly by frontend) ----------
+
+// Health check (used by frontend `backendStore.ts` and Mantle service checker)
+const healthHandler = (req: Request, res: Response) => {
+  res.json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    services: {
+      ipfs: "configured",
+      Mantle: "not configured", // This backend is acting as a local replacement
+    },
+  });
+};
+
+// Unprefixed version for Mantle service client
+app.get("/health", healthHandler);
+// Existing prefixed version retained for any legacy callers
+app.get("/api/health", healthHandler);
+
+// Simple IPFS-like file upload endpoint used by `api.uploadFileToIPFS`
+// Reuses the global `upload` instance so limits and filters are consistent.
+app.post("/ipfs/upload", upload.single("file"), (req: Request, res: Response) => {
+  const file = req.file;
+  if (!file) {
+    return res.status(400).json({ error: "No file provided" });
+  }
+
+  // For now we generate a local pseudo-hash instead of real IPFS
+  const ipfsHash = `local-${uuidv4()}`;
+
+  // Return the shape expected by the frontend: { ipfsHash, url? }
+  return res.json({
+    ipfsHash,
+    filename: file.filename,
+    url: `/storage/uploads/documents/${file.filename}`,
+  });
+});
+
+// Simple IPFS-like JSON upload endpoint used by `api.uploadJSONToIPFS`
+app.post("/ipfs/upload-json", async (req: Request, res: Response) => {
+  try {
+    const payload = req.body;
+    if (!payload || typeof payload !== "object") {
+      return res.status(400).json({ error: "Invalid JSON payload" });
+    }
+
+    const ipfsDir = path.join(__dirname, "..", "storage", "ipfs");
+    await fs.ensureDir(ipfsDir);
+
+    const filename = `${Date.now()}-${uuidv4()}.json`;
+    const fullPath = path.join(ipfsDir, filename);
+    await fs.writeJson(fullPath, payload, { spaces: 2 });
+
+    const ipfsHash = `local-json-${uuidv4()}`;
+
+    return res.json({
+      ipfsHash,
+      filename,
+      url: `/storage/ipfs/${filename}`,
+    });
+  } catch (error) {
+    console.error("Error in /ipfs/upload-json:", error);
+    return res.status(500).json({ error: "Failed to store JSON metadata" });
+  }
+});
+
+// Lightweight listings index endpoint used by `api.createListing`
+// This mimics the Mantle listings index API enough for the frontend to work.
+app.post("/listings", (req: Request, res: Response) => {
+  const { metadataHash, sellerId, indexCid } = req.body || {};
+
+  if (!metadataHash || !sellerId) {
+    return res
+      .status(400)
+      .json({ error: "metadataHash and sellerId are required" });
+  }
+
+  const newIndexCid =
+    indexCid && typeof indexCid === "string"
+      ? indexCid
+      : `local-index-${Date.now()}`;
+
+  // In a real Mantle service, this would update an IPFS index.
+  // For local development we just echo back a stable indexCid so the UI works.
+  return res.json({
+    indexCid: newIndexCid,
+    metadataHash,
+    sellerId,
+  });
+});
+
+// Stub Mantle NFT create endpoint so `api.createLandNFT` does not 404 in local dev.
+// In production this would live in the real Mantle service.
+app.post("/nft/create", (req: Request, res: Response) => {
+  const { metadataHash, size, price, location } = req.body || {};
+  // Just acknowledge the request; the frontend only checks that it doesn't throw.
+  return res.json({
+    ok: true,
+    metadataHash,
+    size,
+    price,
+    location,
+    message: "NFT creation stubbed in local backend",
+  });
+});
+
+// Parcels endpoint used by `api.getParcels` – for now we expose all local listings
+// as "parcels" so discovery and details pages have something to render.
+app.get("/parcels", (req: Request, res: Response) => {
+  try {
+    const listings = dbHelpers.getAllListings();
+
+    // Map our listing shape into a generic parcel shape that the UI can handle.
+    const parcels = listings.map((l) => ({
+      landId: l.id,
+      title: l.title,
+      size: l.size,
+      price: l.price,
+      location: l.location,
+      description: l.description,
+      landType: l.landType,
+      zoning: l.zoning,
+      utilities: l.utilities,
+      nearbyAmenities: l.nearbyAmenities,
+      seller: l.seller,
+      metadataHash: l.metadataHash,
+      status: l.status,
+      images: l.images,
+      documents: l.documents,
+      createdAt: l.createdAt,
+      updatedAt: l.updatedAt,
+    }));
+
+    // Return in a Mantle-like envelope so existing frontend code that expects
+    // `res.items` continues to work, while components that accept a bare array
+    // (and check `Array.isArray(res)`) also still work.
+    res.json({ items: parcels });
+  } catch (error) {
+    console.error("Error in /parcels:", error);
+    res.status(500).json({ error: "Failed to fetch parcels" });
+  }
+});
+
+// Stub endpoint so `api.getListingsByIndex` does not 404 in development
+app.get("/listings/by-index", (req: Request, res: Response) => {
+  res.json({ items: [] });
+});
+
+// ---------- Original /api/* Bima listing routes ----------
+
+// Get all listings
+app.get("/api/listings", (req: Request, res: Response) => {
+  try {
+    const listings = dbHelpers.getAllListings();
+    res.json(listings);
+  } catch (error) {
+    console.error("Error fetching listings:", error);
+    res.status(500).json({ error: "Failed to fetch listings" });
+  }
+});
+
+// Get single listing by ID
+app.get("/api/listings/:id", (req: Request, res: Response) => {
+  try {
+    console.log("Fetching listing with ID:", req.params.id);
+    const listing = dbHelpers.getListingById(req.params.id);
+    console.log("Found listing:", listing ? "Yes" : "No");
+
+    if (!listing) {
+      console.log("Listing not found, returning 404");
+      return res.status(404).json({ error: "Listing not found" });
+    }
+
+    console.log("Returning single listing with price:", listing.price);
+    res.json(listing);
+  } catch (error) {
+    console.error("Error in /api/listings/:id:", error);
+    res.status(500).json({ error: "Failed to fetch listing" });
+  }
+});
+
+// Create new listing
+app.post(
+  "/api/listings",
+  upload.fields([
+    { name: "images", maxCount: 4 },
+    { name: "titleDeed", maxCount: 1 },
+    { name: "surveyReport", maxCount: 1 },
+    { name: "taxCertificate", maxCount: 1 },
+  ]),
+  (req: Request, res: Response) => {
+    try {
+      const {
+        title,
+        location,
+        size,
+        price,
+        description,
+        landType,
+        zoning,
+        utilities,
+        accessibility,
+        nearbyAmenities,
+        sellerName,
+        sellerPhone,
+        sellerEmail,
+        metadataHash,
+      } = req.body;
+
+      // Validate required fields
+      if (!title || !location || !size || !price) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      // Process uploaded files
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const images = files.images
+        ? files.images.map((file) => ({
+            filename: file.filename,
+            originalName: file.originalname,
+            path: `/storage/uploads/images/${file.filename}`,
+          }))
+        : [];
+
+      const documents: ListingInput["documents"] = {
+        titleDeed: files.titleDeed
+          ? {
+              filename: files.titleDeed[0].filename,
+              originalName: files.titleDeed[0].originalname,
+              path: `/storage/uploads/documents/${files.titleDeed[0].filename}`,
+            }
+          : undefined,
+        surveyReport: files.surveyReport
+          ? {
+              filename: files.surveyReport[0].filename,
+              originalName: files.surveyReport[0].originalname,
+              path: `/storage/uploads/documents/${files.surveyReport[0].filename}`,
+            }
+          : undefined,
+        taxCertificate: files.taxCertificate
+          ? {
+              filename: files.taxCertificate[0].filename,
+              originalName: files.taxCertificate[0].originalname,
+              path: `/storage/uploads/documents/${files.taxCertificate[0].filename}`,
+            }
+          : undefined,
+      };
+
+      // Create new listing data
+      const listingData: ListingInput & {
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        status: string;
+      } = {
+        id: uuidv4(),
+        title,
+        location,
+        size,
+        price: parseFloat(price),
+        description,
+        landType,
+        zoning,
+        utilities: utilities ? utilities.split(",").map((u: string) => u.trim()) : [],
+        accessibility,
+        nearbyAmenities: nearbyAmenities
+          ? nearbyAmenities.split(",").map((a: string) => a.trim())
+          : [],
+        images,
+        documents,
+        sellerName,
+        sellerPhone,
+        sellerEmail,
+        metadataHash: metadataHash || undefined,
+        status: "pending_verification",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Save to database using SQLite
+      const newListing = dbHelpers.createListing(listingData);
+
+      res.status(201).json({
+        message: "Listing created successfully",
+        listing: newListing,
+      });
+    } catch (error) {
+      console.error("Error creating listing:", error);
+      res.status(500).json({ error: "Failed to create listing" });
+    }
+  }
+);
+
+// Update listing status (for verification)
+app.patch("/api/listings/:id/status", (req: Request, res: Response) => {
+  try {
+    const { status, verificationStatus } = req.body;
+    const statusData: StatusUpdate = {};
+
+    if (status) {
+      statusData.status = status;
+    }
+
+    if (verificationStatus) {
+      statusData.verificationStatus = verificationStatus;
+    }
+
+    const updatedListing = dbHelpers.updateListingStatus(req.params.id, statusData);
+
+    res.json({
+      message: "Listing updated successfully",
+      listing: updatedListing,
+    });
+  } catch (error) {
+    console.error("Error updating listing:", error);
+    res.status(500).json({ error: "Failed to update listing" });
+  }
+});
+
+// Delete listing
+app.delete("/api/listings/:id", (req: Request, res: Response) => {
+  try {
+    const listing = dbHelpers.deleteListing(req.params.id);
+    
+    if (!listing) {
+      return res.status(404).json({ error: "Listing not found" });
+    }
+
+    // Remove associated files
+    if (listing.images && listing.images.length > 0) {
+      listing.images.forEach((image) => {
+        const imagePath = path.join(
+          __dirname,
+          "..",
+          "storage",
+          "uploads",
+          "images",
+          image.filename
+        );
+        if (fs.existsSync(imagePath)) {
+          fs.removeSync(imagePath);
+        }
+      });
+    }
+
+    if (listing.documents) {
+      Object.values(listing.documents).forEach((doc) => {
+        if (doc) {
+          const docPath = path.join(
+            __dirname,
+            "..",
+            "storage",
+            "uploads",
+            "documents",
+            doc.filename
+          );
+          if (fs.existsSync(docPath)) {
+            fs.removeSync(docPath);
+          }
+        }
+      });
+    }
+
+    res.json({ message: "Listing deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting listing:", error);
+    res.status(500).json({ error: "Failed to delete listing" });
+  }
+});
+
+// Health check
+app.get("/api/health", (req: Request, res: Response) => {
+  res.json({ status: "OK", timestamp: new Date().toISOString() });
+});
+
+// Error handling middleware
+app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+  if (error instanceof multer.MulterError) {
+    if (error.code === "LIMIT_FILE_SIZE") {
+      return res
+        .status(400)
+        .json({ error: "File too large. Maximum size is 10MB." });
+    }
+  }
+
+  res.status(500).json({ error: error.message || "Internal server error" });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Bima Backend Server running on port ${PORT}`);
+  console.log(`📁 Uploads directory: ${path.join(__dirname, "..", "uploads")}`);
+  console.log(`💾 Database: SQLite (storage/data/bima.db)`);
+});
+

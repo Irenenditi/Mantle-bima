@@ -9,12 +9,16 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install all dependencies (including dev dependencies for TypeScript build)
+RUN npm ci
 
-# Copy application files
-COPY . .
+# Copy source files
+COPY src ./src
+
+# Build TypeScript
+RUN npm run build
 
 # Create unified storage directory
 RUN mkdir -p /app/storage/data /app/storage/uploads/images /app/storage/uploads/documents
@@ -23,4 +27,4 @@ RUN mkdir -p /app/storage/data /app/storage/uploads/images /app/storage/uploads/
 EXPOSE 5000
 
 # Start the application
-CMD ["node", "server.js"]
+CMD ["node", "dist/server.js"]

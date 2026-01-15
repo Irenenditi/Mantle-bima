@@ -1,0 +1,21 @@
+{
+  "title": "bima",
+  "size": "4.4",
+  "price": "23.000",
+  "location": "nakuru",
+  "description": "iddlea ",
+  "landType": "agricultural",
+  "zoning": "resedential",
+  "utilities": "water",
+  "accessibility": "murram",
+  "nearbyAmenities": "school",
+  "seller": {
+    "name": "john mokaya",
+    "phone": "+254787680278",
+    "email": "mokayaj@ieee.org"
+  },
+  "images": [],
+  "documents": [],
+  "timestamp": "2026-01-15T07:01:34.212Z",
+  "status": "pending"
+}

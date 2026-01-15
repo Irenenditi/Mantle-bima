@@ -152,5 +152,15 @@ export const api = {
     return response.data;
   },
 
+  // Local SQLite backend bridge – save a full listing (form + files) into /api/listings
+  // Used only in local dev; in production Mantle handles persistence separately.
+  async saveListingToBackend(formData: FormData) {
+    const response = await axios.post(`${API_BASE_URL}/api/listings`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 20000,
+    });
+    return response.data;
+  },
+
   // Backend functions removed - using only Mantle service
 };

@@ -1,0 +1,21 @@
+{
+  "title": "loma",
+  "size": "2.3",
+  "price": "23000",
+  "location": "buenos",
+  "description": "aldmd",
+  "landType": "industrial",
+  "zoning": "resedential",
+  "utilities": "water",
+  "accessibility": "murram",
+  "nearbyAmenities": "school",
+  "seller": {
+    "name": "john mokaya",
+    "phone": "+254787680278",
+    "email": "mokayaj@ieee.org"
+  },
+  "images": [],
+  "documents": [],
+  "timestamp": "2026-01-15T07:04:29.372Z",
+  "status": "pending"
+}

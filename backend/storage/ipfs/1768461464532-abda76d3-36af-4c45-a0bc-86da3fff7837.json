@@ -1,0 +1,25 @@
+{
+  "title": "get",
+  "size": "6.7",
+  "price": "78000",
+  "location": "kisii",
+  "description": "jjj",
+  "landType": "",
+  "zoning": "",
+  "utilities": "",
+  "accessibility": "tarmac",
+  "nearbyAmenities": "school",
+  "seller": {
+    "name": "john mokaya",
+    "phone": "+254746271236",
+    "email": "mokayaj@ieee.org"
+  },
+  "images": [
+    {
+      "cid": "local-16d771b0-fb46-4133-b850-6b3cbfeeacdc"
+    }
+  ],
+  "documents": [],
+  "timestamp": "2026-01-15T07:17:44.429Z",
+  "status": "pending"
+}

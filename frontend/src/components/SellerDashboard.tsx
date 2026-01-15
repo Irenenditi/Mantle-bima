@@ -454,7 +454,7 @@ export default function SellerDashboard() {
         // Continue even if Mantle fails - we'll still save to local database
       }
 
-      // 4) Save listing to Mantle service for marketplace visibility (IPFS index-backed)
+      // 4) Save listing metadata to Mantle listings index (for IPFS-backed discovery)
       try {
         const sellerId = formData.sellerEmail || formData.sellerPhone || 'anonymous';
         const existingIndex = localStorage.getItem('LISTINGS_INDEX_CID');
@@ -462,10 +462,53 @@ export default function SellerDashboard() {
         if (resp?.indexCid) {
           localStorage.setItem('LISTINGS_INDEX_CID', resp.indexCid);
         }
-        createdSuccessfully = true;
       } catch (error) {
         console.error('Error saving listing:', error);
         alert('Error saving listing. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 5) Persist full listing (form data + original files) into local SQLite backend
+      //    so it shows up in the marketplace & inspector dashboards via /parcels.
+      try {
+        const backendForm = new FormData();
+        backendForm.append("title", formData.title);
+        backendForm.append("location", formData.location);
+        backendForm.append("size", formData.size);
+        backendForm.append("price", formData.price);
+        backendForm.append("description", formData.description);
+        backendForm.append("landType", formData.landType);
+        backendForm.append("zoning", formData.zoning);
+        backendForm.append("utilities", formData.utilities);
+        backendForm.append("accessibility", formData.accessibility);
+        backendForm.append("nearbyAmenities", formData.nearbyAmenities);
+        backendForm.append("sellerName", formData.sellerName);
+        backendForm.append("sellerPhone", formData.sellerPhone);
+        backendForm.append("sellerEmail", formData.sellerEmail);
+        backendForm.append("metadataHash", metadataHash);
+
+        // Attach image files
+        for (const img of uploadedImages) {
+          backendForm.append("images", img);
+        }
+
+        // Attach document files
+        if (uploadedDocs.titleDeed) {
+          backendForm.append("titleDeed", uploadedDocs.titleDeed);
+        }
+        if (uploadedDocs.surveyReport) {
+          backendForm.append("surveyReport", uploadedDocs.surveyReport);
+        }
+        if (uploadedDocs.taxCertificate) {
+          backendForm.append("taxCertificate", uploadedDocs.taxCertificate);
+        }
+
+        await api.saveListingToBackend(backendForm);
+        createdSuccessfully = true;
+      } catch (error) {
+        console.error("Error saving listing to local backend:", error);
+        alert("Listing was created on IPFS but failed to save locally. Please try again.");
         setIsSubmitting(false);
         return;
       }
