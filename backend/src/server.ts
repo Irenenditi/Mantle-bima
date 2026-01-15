@@ -224,27 +224,75 @@ app.post("/nft/create", (req: Request, res: Response) => {
 
 // Stub land verification endpoint to satisfy `api.verifyLand` calls in local dev.
 app.post("/land/verify", (req: Request, res: Response) => {
-  const { landId, role, name, tokenId } = req.body || {};
-  return res.json({
-    ok: true,
-    verified: true,
-    status: "pending",
-    landId,
-    role,
-    name,
-    tokenId,
-    message: "Land verification stubbed in local backend",
-  });
+  try {
+    const { landId, role, name, tokenId } = req.body || {};
+    const id = String(landId || "").trim();
+    if (!id) {
+      return res.status(400).json({ error: "landId is required" });
+    }
+
+    const listing = dbHelpers.getListingById(id);
+    if (!listing) {
+      return res.status(404).json({ error: "Listing not found", landId: id });
+    }
+
+    // Map inspector roles to verification steps
+    // - Surveyor: site verification
+    // - Chief: legal verification
+    const current = listing.verificationStatus || {
+      documents: "pending",
+      site: "pending",
+      legal: "pending",
+    };
+
+    const next: any = { ...current };
+    const roleStr = String(role || "").toLowerCase();
+    if (roleStr === "surveyor") next.site = "approved";
+    if (roleStr === "chief") next.legal = "approved";
+
+    // If seller uploaded documents, we treat them as submitted; an admin flow could approve later.
+    if (current.documents === "pending") {
+      next.documents = "approved";
+    }
+
+    const allApproved =
+      next.documents === "approved" &&
+      next.site === "approved" &&
+      next.legal === "approved";
+
+    const updated = dbHelpers.updateListingStatus(id, {
+      status: allApproved ? "verified" : "pending_verification",
+      verificationStatus: next,
+    });
+
+    return res.json({
+      ok: true,
+      verified: allApproved,
+      status: updated.status,
+      landId: id,
+      role,
+      name,
+      tokenId,
+      verificationStatus: updated.verificationStatus,
+      message: allApproved
+        ? "Listing verified"
+        : "Verification recorded (awaiting additional approvals)",
+    });
+  } catch (error) {
+    console.error("Error in /land/verify:", error);
+    return res.status(500).json({ error: "Failed to verify land" });
+  }
 });
 
 // Parcels endpoint used by `api.getParcels` – for now we expose all local listings
 // as "parcels" so discovery and details pages have something to render.
 app.get("/parcels", (req: Request, res: Response) => {
   try {
+    const statusQuery = typeof req.query.status === "string" ? req.query.status : undefined;
     const listings = dbHelpers.getAllListings();
 
     // Map our listing shape into a generic parcel shape that the UI can handle.
-    const parcels = listings.map((l) => ({
+    const parcelsAll = listings.map((l) => ({
       landId: l.id,
       title: l.title,
       size: l.size,
@@ -263,6 +311,17 @@ app.get("/parcels", (req: Request, res: Response) => {
       createdAt: l.createdAt,
       updatedAt: l.updatedAt,
     }));
+
+    // Optional filtering to mimic Mantle service behavior
+    const parcels = statusQuery
+      ? parcelsAll.filter((p) => {
+          const s = String(p.status || "").toLowerCase();
+          const q = statusQuery.toLowerCase();
+          if (q === "pending") return s === "pending" || s === "pending_verification";
+          if (q === "minted") return s === "minted" || s === "verified";
+          return s === q;
+        })
+      : parcelsAll;
 
     // Return in a Mantle-like envelope so existing frontend code that expects
     // `res.items` continues to work, while components that accept a bare array

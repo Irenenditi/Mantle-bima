@@ -190,8 +190,48 @@ export default function InspectorDashboard() {
     }
   }
 
-  const pendingRequests = mockRequests.filter(req => req.status === 'pending' || req.status === 'in-progress');
-  const completedRequests = mockRequests.filter(req => req.status === 'completed');
+  // Prefer real backend parcels as "verification requests" when available.
+  const pendingRequests: VerificationRequest[] = parcels.length
+    ? parcels
+        .filter((p) => String(p.status || '').includes('pending'))
+        .map((p) => ({
+          id: `VR-${String(p.landId)}`,
+          propertyId: String(p.landId),
+          location: p.location || 'Unknown',
+          area: p.size || '',
+          sellerName: 'Seller',
+          sellerDID: 'did:local:unknown',
+          requestDate: new Date().toISOString(),
+          deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          status: 'pending' as const,
+          priority: 'medium' as const,
+          documents: [],
+          compensation: '—',
+          requiredInspectors: 2,
+          currentInspectors: 0,
+        }))
+    : mockRequests.filter(req => req.status === 'pending' || req.status === 'in-progress');
+
+  const completedRequests: VerificationRequest[] = parcels.length
+    ? parcels
+        .filter((p) => String(p.status || '').toLowerCase().includes('verified'))
+        .map((p) => ({
+          id: `VR-${String(p.landId)}`,
+          propertyId: String(p.landId),
+          location: p.location || 'Unknown',
+          area: p.size || '',
+          sellerName: 'Seller',
+          sellerDID: 'did:local:unknown',
+          requestDate: new Date().toISOString(),
+          deadline: new Date().toISOString(),
+          status: 'completed' as const,
+          priority: 'medium' as const,
+          documents: [],
+          compensation: '—',
+          requiredInspectors: 2,
+          currentInspectors: 2,
+        }))
+    : mockRequests.filter(req => req.status === 'completed');
 
   return (
     <div className="min-h-screen bg-background">
