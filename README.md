@@ -95,6 +95,7 @@ graph TD
 
 ---
 
+
 ## 🔗 Mantle Integration Deep Dive
 
 ### ERC-721 Land Title NFTs
@@ -168,6 +169,163 @@ All inspector approvals, escrow actions, listings, and title transfers are logge
 * 🔄 User testing ongoing
 
 ---
+Deployment & Setup Guide
+
+BIMA consists of three layers:
+
+Smart Contracts (Mantle Sepolia, Solidity + Foundry)
+
+Backend API (Node.js)
+
+Frontend dApp (Next.js)
+
+Each can be deployed independently.
+
+🔗 1. Smart Contracts (Mantle + Foundry)
+📁 Location
+/contracts
+/script
+
+🔧 Prerequisites
+
+Foundry installed
+
+Mantle Sepolia ETH in deployer wallet
+
+Install Foundry if missing:
+
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+
+🌐 Environment Configuration
+
+Create .env in the root directory:
+
+MANTLE_RPC=https://rpc.sepolia.mantle.xyz
+MANTLE_CHAIN_ID=5003
+PRIVATE_KEY=YOUR_PRIVATE_KEY
+
+
+Load variables:
+
+source .env
+
+📦 Install Dependencies
+forge install OpenZeppelin/openzeppelin-contracts
+
+
+Ensure remappings.txt includes:
+
+@openzeppelin/=lib/openzeppelin-contracts/
+
+🧪 Compile & Test
+forge build
+forge test
+
+🚀 Deploy to Mantle Sepolia
+forge script script/DeployBima.s.sol \
+  --rpc-url $MANTLE_RPC \
+  --chain-id $MANTLE_CHAIN_ID \
+  --private-key $PRIVATE_KEY \
+  --broadcast \
+  --verify
+
+
+📌 Deployed Contracts (example)
+
+Contract	Network	Address
+LandRegistry (ERC721)	Mantle Sepolia	0x...
+EscrowContract	Mantle Sepolia	0x...
+🧩 2. Backend API (Node.js)
+
+The backend coordinates:
+
+IPFS uploads
+
+Inspector workflows
+
+Metadata indexing
+
+Read-only chain queries
+
+📁 Location
+/server
+
+🔧 Setup
+cd server
+npm install
+
+🌐 Backend Environment
+
+Create server/.env:
+
+PORT=3001
+MANTLE_RPC=https://rpc.sepolia.mantle.xyz
+LAND_REGISTRY_ADDRESS=0x...
+ESCROW_ADDRESS=0x...
+IPFS_GATEWAY=https://ipfs.io/ipfs/
+
+▶️ Run Backend
+npm run dev
+
+
+Backend will be live at:
+
+http://localhost:3001
+
+🎨 3. Frontend dApp (Next.js)
+
+The frontend provides:
+
+Wallet connection
+
+Land listings
+
+Inspector dashboards
+
+Purchase & escrow flows
+
+📁 Location
+/client
+
+🔧 Setup
+cd client
+npm install
+
+🌐 Frontend Environment
+
+Create client/.env.local:
+
+NEXT_PUBLIC_MANTLE_RPC=https://rpc.sepolia.mantle.xyz
+NEXT_PUBLIC_CHAIN_ID=5003
+NEXT_PUBLIC_LAND_REGISTRY=0x...
+NEXT_PUBLIC_ESCROW_ADDRESS=0x...
+
+▶️ Run Frontend
+npm run dev
+
+
+Frontend available at:
+
+http://localhost:3000
+
+🔄 End-to-End Flow (Live)
+
+User connects wallet (MetaMask)
+
+Seller uploads land documents
+
+Backend pins data to IPFS
+
+Inspectors review & sign
+
+Land NFT minted on Mantle
+
+Buyer purchases → escrow
+
+Title transferred → funds released
+
+All actions are publicly verifiable on Mantle.
 
 ## 👨‍💻 Team
 
