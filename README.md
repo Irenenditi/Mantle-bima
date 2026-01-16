@@ -1,236 +1,191 @@
-# 🏡 BIMA — Reimagining Land Ownership on Mantle
 
-> **Mantle Hackathon Track — Trust, Transparency, and Tokenized Land for the Real World**
+
+---
+
+# 🏡 BIMA - Decentralized Land Marketplace
+
+> **Mantle Track: Transforming Land Ownership in Africa through Blockchain**
 
 [![Built on Mantle](https://img.shields.io/badge/Built_on-Mantle-0EA5E9?style=for-the-badge)](https://www.mantle.xyz)
-[![Solidity](https://img.shields.io/badge/Solidity-0.8.x-363636?style=for-the-badge\&logo=solidity)](https://soliditylang.org)
-[![Foundry](https://img.shields.io/badge/Built_with-Foundry-black?style=for-the-badge)](https://book.getfoundry.sh)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)](https://github.com/your-username/bima)
+[![Tests](https://img.shields.io/badge/Tests-Passing-green?style=for-the-badge)](https://github.com/your-username/bima/actions)
 
 ---
 
-## 🌍 Vision
+## 📋 Project Documentation
 
-**BIMA** is a decentralized land marketplace designed for places where land matters most — and trust is hardest to guarantee.
-
-We combine **tokenized land titles**, **decentralized identities (DIDs)**, and **human accountability** to create a system where land ownership is:
-
-* **Provable on-chain**
-* **Verified by real, known people**
-* **Transferable without corruption or bureaucracy**
-
-Built on **Mantle**, BIMA leverages low fees, fast finality, and Ethereum compatibility to make land markets finally work for everyday people.
-
-> *BIMA bridges blockchain certainty with community trust.*
+* **📊 Pitch Deck**: [View Our Presentation](https://docs.google.com/presentation/d/1cGslZ-suI-Kgur_XwWNqFPYfhM8tAo6ANXRfOSw60us/edit?usp=sharing)
+* 📊 **Live Project**: [https://bima-mantle.vercel.app/](https://bima-mantle.vercel.app/)
+* 📊 **Project Whitepaper**: [https://app.gitbook.com/invite/Re8U2LJlijqo242e16Eq/FQNutGDFOT8FpslNIAHr](https://app.gitbook.com/invite/Re8U2LJlijqo242e16Eq/FQNutGDFOT8FpslNIAHr)
 
 ---
 
-## 🚨 The Problem
+## 🌍 Overview
 
-Across emerging markets, land ownership is fragile:
+**BIMA** is a decentralized land marketplace that leverages blockchain technology, decentralized identifiers (DIDs), and tokenized land titles to build a transparent, trusted, and community-driven land ecosystem.
 
-* Paper titles are forged, duplicated, or lost
-* Central registries are opaque or corrupt
-* Buyers cannot verify legitimacy
-* Sellers cannot prove ownership
-* Local officials lack accountability
+Deployed on the **Mantle Network**, BIMA enables individuals, institutions, and local authorities to buy, sell, and verify land ownership securely through **on-chain records, smart escrow contracts, and multi-signature verification** by trusted community inspectors.
 
-**The result:** disputes, fraud, frozen capital, and generational insecurity.
+> The name **“BIMA”**, derived from the Swahili word for land or property, reflects our mission: empowering individuals to own and trade land with confidence, speed, and transparency.
 
 ---
 
-## 💡 The BIMA Solution
+## 🚨 The Problem: Land Ownership Challenges
 
-BIMA transforms land into a **living on-chain asset**.
+Land remains one of the most valuable yet problematic assets in emerging economies:
 
-Every parcel becomes an **ERC-721 Land Title NFT** with a verifiable history. Every interaction — listing, inspection, payment, and transfer — is recorded on **Mantle’s public ledger**.
+| Challenge                         | Impact                                             |
+| --------------------------------- | -------------------------------------------------- |
+| **Fraudulent & Duplicate Titles** | Paper-based or corrupted registries enable fraud   |
+| **Bureaucratic Processes**        | Lengthy verification and transfer procedures       |
+| **Low Trust Ecosystems**          | Distrust between landowners, buyers, and officials |
+| **Lack of Accountability**        | Unreliable surveyors and land officers             |
+| **Opacity in Records**            | Limited public access to verified ownership data   |
 
-But BIMA goes further.
-
-### 👥 Human Trust, On-Chain
-
-BIMA introduces a powerful role: **Inspectors**.
-
-Inspectors are **real, identifiable community authorities**:
-
-* Local chiefs
-* Licensed surveyors
-* Government land officers
-
-They are not anonymous wallets — they are people users can **see, meet, and hold accountable**.
-
-A land title can only be minted or transferred after **multi-inspector verification**.
+**Result:** frequent land disputes, loss of property rights, and reduced investment confidence.
 
 ---
 
-## 🔄 How BIMA Works
+## 🎯 Our Solution
+
+BIMA creates a secure, user-friendly digital marketplace where land transactions are governed by **smart contracts on Mantle**, rather than opaque bureaucratic intermediaries.
+
+### 🔄 How BIMA Works
 
 ```mermaid
 graph TD
-    A[Land Owner] --> B[Upload Documents]
-    B --> C[IPFS Storage]
-    C --> D[Inspector Review]
-    D -->|Quorum Approved| E[Mint Land NFT]
-    E --> F[Marketplace Listing]
-    F --> G[Buyer Purchase]
-    G --> H[Escrow Smart Contract]
-    H --> I[Title Transfer]
-    I --> J[Release Payment]
+    A[Seller Lists Land] --> B[Upload Documents to IPFS];
+    B --> C[Inspector Verification];
+    C --> D{Multi-Signature Approval};
+    D -->|Approved| E[Mint Land Title NFT];
+    D -->|Rejected| F[Returned to Seller];
+    E --> G[Marketplace Listing];
+    G --> H[Buyer Purchases];
+    H --> I[Escrow Smart Contract];
+    I --> J[Title NFT Transfer];
+    J --> K[Release Payment];
 ```
-
----
-
-## 🧠 Core Concepts
-
-### 🏷️ Land Title NFTs
-
-* ERC-721 compliant
-* One NFT = one verified land parcel
-* Immutable ownership history
-* Metadata includes location, size, documents, and verification status
-
-### 🆔 Decentralized Identities (DIDs)
-
-* Every user has a verifiable identity
-* Prevents impersonation and Sybil attacks
-* Enables role-based permissions
-
-### 👁️ Inspector Verification
-
-* Multi-signature approval model
-* No single authority can mint or transfer land
-* Inspectors earn on-chain reputation
-
-### 💰 Escrowed Payments
-
-* Buyer funds locked in smart contract
-* Released only after verified title transfer
-* Eliminates counterparty risk
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Blockchain & Smart Contracts
+### 🧠 Languages & Frameworks
 
-* **Mantle Network (Sepolia)**
-* **Solidity (0.8.x)**
-* **OpenZeppelin Contracts**
-* **Foundry (forge & cast)**
+![Solidity](https://img.shields.io/badge/Solidity-0.8.x-363636?style=for-the-badge\&logo=solidity)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge\&logo=javascript\&logoColor=black)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge\&logo=react\&logoColor=61DAFB)
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge\&logo=next.js\&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge\&logo=node.js\&logoColor=white)
 
-### Storage & Identity
+### 🌐 Mantle & Web3
 
-* **IPFS** for documents and metadata
-* **DID-compatible identity layer**
+![Mantle](https://img.shields.io/badge/Mantle-L2-0EA5E9?style=for-the-badge)
+![EVM](https://img.shields.io/badge/EVM-Compatible-purple?style=for-the-badge)
+![Ethers.js](https://img.shields.io/badge/Ethers.js-7A98FB?style=for-the-badge)
+![IPFS](https://img.shields.io/badge/IPFS-65C2CB?style=for-the-badge\&logo=ipfs\&logoColor=white)
 
-### Frontend
+### 🧰 Development Tools
 
-* **Next.js + React**
-* **Ethers.js**
-* **WalletConnect / MetaMask**
+![Foundry](https://img.shields.io/badge/Foundry-black?style=for-the-badge)
+![OpenZeppelin](https://img.shields.io/badge/OpenZeppelin-4E5EE4?style=for-the-badge\&logo=OpenZeppelin\&logoColor=white)
+![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge\&logo=npm\&logoColor=white)
+![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge\&logo=git\&logoColor=white)
+
+---
+
+## 🔗 Mantle Integration Deep Dive
+
+### ERC-721 Land Title NFTs
+
+BIMA tokenizes verified land parcels as **ERC-721 NFTs deployed on Mantle**. Each NFT represents a unique land title with immutable ownership history and IPFS-hosted documentation.
+
+### On-Chain Verification & Transparency
+
+All inspector approvals, escrow actions, listings, and title transfers are logged as **public Mantle transactions**, enabling full auditability via Mantle explorers.
+
+### Smart Contracts (Solidity)
+
+* Land Title NFT Contract
+* Inspector Registry (multi-signature approvals)
+* Escrow Contract for buyer–seller protection
 
 ---
 
 ## 🏗️ System Architecture
 
 ```
-┌──────────────┐        ┌────────────────┐        ┌──────────────┐
-│   Frontend   │◄──────►│ Smart Contracts│◄──────►│ Mantle Chain │
-│  (Next.js)   │        │  (Solidity)    │        │ (L2 Network) │
-└──────┬───────┘        └──────┬─────────┘        └──────┬───────┘
-       │                        │                           │
-       ▼                        ▼                           ▼
-┌──────────────┐        ┌────────────────┐        ┌──────────────┐
-│   Wallets    │        │     IPFS       │        │   Explorer   │
-│ MetaMask etc │        │ Land Documents │        │ MantleScan   │
-└──────────────┘        └────────────────┘        └──────────────┘
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Backend API    │    │ Mantle Network  │
+│ React / Next.js │◄──►│ Node.js / Express│◄──►│ Solidity Smart  │
+│ Ethers.js       │    │ IPFS Gateway     │    │ Contracts       │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
 ---
 
-## 🚀 Deployment (Foundry)
+## 🖥️ Platform Features & UI Showcase
 
-### Environment
+### 🏠 Landing Page & User Onboarding
 
-```bash
-MANTLE_RPC=https://rpc.sepolia.mantle.xyz
-MANTLE_CHAIN_ID=5003
-PRIVATE_KEY=YOUR_PRIVATE_KEY
-```
+<img width="1832" height="954" alt="BIMA Landing Page" src="https://github.com/user-attachments/assets/a1c0d032-562d-4ead-bba7-08f2a8a53142" />
 
-### Deploy
+### 🎟️ Land Title Minting Interface
 
-```bash
-forge script script/DeployBima.s.sol \
-  --rpc-url $MANTLE_RPC \
-  --chain-id 5003 \
-  --private-key $PRIVATE_KEY \
-  --broadcast \
-  --verify
-```
+<img width="1832" height="954" alt="Land Title Minting" src="https://github.com/user-attachments/assets/land-title-minting-screenshot" />
+
+### 🏡 Land Listing & Marketplace
+
+<img width="1832" height="954" alt="Marketplace View" src="https://github.com/user-attachments/assets/35c528b1-57a3-4c8c-afd3-fd783ce4e2f3" />
+
+### 📝 Land Listing Creation
+
+<img width="1832" height="954" alt="Create Listing" src="https://github.com/user-attachments/assets/4d09e8dc-835d-4f90-ace7-77dbbf5d1b8b" />
+
+### 🔍 Inspector Verification Portal
+
+<img width="1832" height="954" alt="Inspector Portal" src="https://github.com/user-attachments/assets/83ac79a7-4584-4265-9a1a-5fb6e7e719ce" />
 
 ---
 
 ## ✨ Key Features
 
-* ✅ Tokenized land titles (ERC-721)
-* ✅ Inspector-based multi-sign verification
-* ✅ Escrow-protected land purchases
-* ✅ Full on-chain audit trail
-* ✅ Low-cost transactions via Mantle
-* ✅ Real-world accountability
+* Tokenized land titles (ERC-721)
+* Inspector-based multi-signature verification
+* Escrow-protected purchases
+* DID-based identities
+* Public, immutable on-chain audit trail
+* Low transaction fees via Mantle
 
 ---
 
-## 🌍 Impact
+## 📊 Project Status
 
-| Metric             | Traditional  | BIMA       |
-| ------------------ | ------------ | ---------- |
-| Title Verification | Weeks–Months | Hours–Days |
-| Fraud Risk         | High         | Near-zero  |
-| Transfer Cost      | $100–$500    | Minimal    |
-| Transparency       | Opaque       | Public     |
-
-BIMA unlocks:
-
-* Safer land markets
-* Higher investment confidence
-* Reduced disputes
-* Stronger property rights
+* ✅ Smart contracts deployed on Mantle Sepolia
+* ✅ Frontend MVP completed
+* ✅ Inspector verification flow implemented
+* 🔄 User testing ongoing
 
 ---
 
-## 📊 Hackathon Progress
+## 👨‍💻 Team
 
-* Smart contract MVP completed
-* Inspector verification implemented
-* Escrow purchase flow working
-* Deployed on Mantle Sepolia
-* Demo-ready
-
----
-
-## 👥 Team
-
-| Name          | Role                    |
-| ------------- | ----------------------- |
-| John Mokaya   | Frontend Developer      |
-| Mary Njoroge  | Project Manager         |
-| Irene Njoroge | Smart Contract Engineer |
-| Joseph Okumu  | Backend Engineer        |
-
----
-
-## 📄 License
-
-MIT License © BIMA
+| Name          | Role                     | Contact                                                           |
+| ------------- | ------------------------ | ----------------------------------------------------------------- |
+| John Mokaya   | Frontend Developer       | [mokayaj857@gmail.com](mailto:mokayaj857@gmail.com)               |
+| Mary Njoroge  | Project Manager          | [mariannapeters203@gmail.com](mailto:mariannapeters203@gmail.com) |
+| Irene Njoroge | Smart Contract Developer | [irenenditi1@gmail.com](mailto:irenenditi1@gmail.com)             |
+| Joseph Okumu  | Backend Developer        | [jokumu25@gmail.com](mailto:jokumu25@gmail.com)                   |
 
 ---
 
 <div align="center">
 
-**BIMA — Land You Can Trust**
-
-Built with ❤️ on Mantle
+**Built with ❤️ on Mantle Network**
+*Transforming African Land Ownership — One Verified Title at a Time*
 
 </div>
+
+---
+
