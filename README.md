@@ -185,7 +185,8 @@ All inspector approvals, escrow actions, listings, and title transfers are logge
 
 ### 🏠 Landing Page & User Onboarding
 
-<img width="1832" height="954" alt="BIMA Landing Page" src="https://github.com/user-attachments/assets/a1c0d032-562d-4ead-bba7-08f2a8a53142" />
+<<img width="1672" height="959" alt="Screenshot from 2025-12-28 17-34-10" src="https://github.com/user-attachments/assets/6de72246-0c75-45a9-ae3b-aea51e251ad4" />
+ />
 
 ### 🎟️ Land Title Minting Interface
 
