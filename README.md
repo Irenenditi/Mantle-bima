@@ -21,6 +21,57 @@
 
 ---
 
+# 🚀 Quick Start Guide
+
+## Run the App Locally
+
+### 1. Clone and Install
+```bash
+git clone https://github.com/your-username/bima.git
+cd bima
+npm install
+```
+
+### 2. Set Up Environment
+```bash
+cp .env.example .env.local
+# Edit .env.local with your keys (see below)
+```
+
+### 3. Run the Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 🔧 Required Environment Variables
+Add these to your `.env.local`:
+```env
+# Mantle Network
+NEXT_PUBLIC_MANTLE_RPC_URL=https://rpc.testnet.mantle.xyz
+NEXT_PUBLIC_MANTLE_CHAIN_ID=5001
+NEXT_PUBLIC_CONTRACT_ADDRESS=your_contract_address_here
+```
+
+## 📦 Production Build
+```bash
+npm run build
+npm start
+```
+
+## 🌐 Live Demo
+Check out our live deployment: [https://bima-mantle.vercel.app](https://bima-mantle.vercel.app)
+
+## 🐛 Need Help?
+```bash
+# Check for common issues
+npm run debug
+
+# Reset and clean install
+npm run clean:install
+```
+
+That's it! Your BIMA marketplace is now running locally. 🎉
 ## 🌍 Overview
 
 **BIMA** is a decentralized land marketplace that leverages blockchain technology, decentralized identifiers (DIDs), and tokenized land titles to build a transparent, trusted, and community-driven land ecosystem.
