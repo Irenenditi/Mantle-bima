@@ -27,14 +27,18 @@
 
 ### 1. Clone and Install
 ```bash
-git clone https://github.com/your-username/bima.git
+git clone https://github.com/Irenenditi/Mantle-bima.git
 cd bima
+cd frontend
 npm install
+npm run dev
 ```
 
-### 2. Set Up Environment
+### 2. backend Set Up Environment
 ```bash
-cp .env.example .env.local
+cd backend
+npm install
+npm start
 # Edit .env.local with your keys (see below)
 ```
 
