@@ -15,7 +15,7 @@
 
 ## 📋 Project Documentation
 
-* **📊 Pitch Deck**: [View Our Presentation](https://docs.google.com/presentation/d/1cGslZ-suI-Kgur_XwWNqFPYfhM8tAo6ANXRfOSw60us/edit?usp=sharing)
+* **📊 Pitch Deck**: [View Our Presentation](https://gofile.io/d/c128ee7c-d45b-4736-ae09-f1a81004e29b)
 * 📊 **Live Project**: [View Our Demo](https://drive.google.com/file/d/17_noJiC_8n-TCQZ94j4F2uLRVRN9EBHa/view?usp=sharing)
 * 📊 **Project Whitepaper**: [https://app.gitbook.com/invite/Re8U2LJlijqo242e16Eq/FQNutGDFOT8FpslNIAHr](https://app.gitbook.com/invite/Re8U2LJlijqo242e16Eq/FQNutGDFOT8FpslNIAHr)
 
