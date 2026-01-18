@@ -185,8 +185,13 @@ All inspector approvals, escrow actions, listings, and title transfers are logge
 
 ### 🏠 Landing Page & User Onboarding
 
-<<img width="1672" height="959" alt="Screenshot from 2025-12-28 17-34-10" src="https://github.com/user-attachments/assets/6de72246-0c75-45a9-ae3b-aea51e251ad4" />
- />
+<img width="1490" height="942" alt="Screenshot from 2026-01-15 12-56-00" src="https://github.com/user-attachments/assets/99740177-2d60-403d-931d-8ea023234b48" />
+
+ <img width="1750" height="963" alt="Screenshot from 2025-11-15 18-08-18" src="https://github.com/user-attachments/assets/0500e167-a5c1-4222-aee3-3ae1db42f5e7" />
+ <img width="1490" height="942" alt="Screenshot from 2026-01-15 12-56-00" src="https://github.com/user-attachments/assets/f92cbec2-f9fd-463d-9372-6d9dd461eb2c" />
+
+
+ 
 
 ### 🎟️ Land Title Minting Interface
 
@@ -194,7 +199,8 @@ All inspector approvals, escrow actions, listings, and title transfers are logge
 
 ### 🏡 Land Listing & Marketplace
 
-<img width="1832" height="954" alt="Marketplace View" src="https://github.com/user-attachments/assets/35c528b1-57a3-4c8c-afd3-fd783ce4e2f3" />
+<img width="1258" height="936" alt="Screenshot from 2026-01-15 12-54-57" src="https://github.com/user-attachments/assets/6031dc62-d584-45b5-855c-256167727632" />
+
 
 ### 📝 Land Listing Creation
 
@@ -202,7 +208,8 @@ All inspector approvals, escrow actions, listings, and title transfers are logge
 
 ### 🔍 Inspector Verification Portal
 
-<img width="1832" height="954" alt="Inspector Portal" src="https://github.com/user-attachments/assets/83ac79a7-4584-4265-9a1a-5fb6e7e719ce" />
+<img width="1258" height="936" alt="Screenshot from 2026-01-15 12-55-17" src="https://github.com/user-attachments/assets/91bbbc9d-c2f9-4099-8dd6-35ec3e9ecf23" />
+
 
 ---
 
